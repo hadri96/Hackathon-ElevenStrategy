@@ -173,4 +173,5 @@ cython_debug/
 # Ignore all files in the data directory
 data/*.csv
 data/*.xlsx
+*.DS_Store
 
