@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 import git
 import pandas as pd
+from sklearn.preprocessing import MinMaxScaler
 class DataLoader:
 	"""A class to handle loading data files from a specified directory.
 
@@ -44,6 +45,7 @@ class DataLoader:
 		self.data_dir_path = os.path.join(self.root_dir, data_dir_path)
 		if load_all_files:
 			self._load_all_files()
+		
 
 	def _find_git_root(self) -> str:
 		"""Find the root directory of the git repository.
@@ -119,7 +121,7 @@ class DataLoader:
 	def clean_weather(self):
 		self.weather['dt_iso'] = pd.to_datetime(self.weather['dt_iso'], format='%Y-%m-%d %H:%M:%S %z UTC', errors='coerce')
 		self.weather['dt_iso'] = self.weather['dt_iso'].dt.tz_convert(None)
-		columns_to_drop = ['dew_point','temp_min','temp_max','humidity', 'weather_icon','grnd_level','sea_level','visibility','dt','timezone','city_name','lat','lon','snow_1h','snow_3h','wind_deg','wind_gust','weather_id']
+		columns_to_drop = ['dew_point','rain_1h','rain_3h','temp_min','temp_max','humidity', 'weather_icon','grnd_level','sea_level','visibility','dt','timezone','city_name','lat','lon','snow_1h','snow_3h','wind_deg','wind_gust','weather_id']
 		self.weather = self.weather.drop(columns=columns_to_drop)
 		self.weather = self.weather[(self.weather['dt_iso'].dt.year.isin([2018, 2019])) | (self.weather['dt_iso'].dt.year >= 2022)]
 		pass
@@ -192,7 +194,12 @@ class DataLoader:
 		pass
 
 	def preprocess_attendance(self):
-		"""
-		Preprocess the data.
-		"""
+		self.attendance['USAGE_DATE'] = pd.to_datetime(self.attendance['USAGE_DATE'])
+		self.attendance.drop_duplicates(inplace=True)
+		#Standardadising the attendance data beteen 0 to 1 using MinMaxScaler
+		scaler = MinMaxScaler()
+		self.attendance['attendance_normalized'] = scaler.fit_transform(self.attendance[['attendance']])
+		#changing the date of the data to falsify 2021 and 2020 data to accomodate the model
+		# Add 2 years to rows with year 2018 and 2019
+		self.attendance.loc[self.attendance['USAGE_DATE'].dt.year.isin([2018, 2019]), 'USAGE_DATE'] += pd.DateOffset(years=2)
 		pass
