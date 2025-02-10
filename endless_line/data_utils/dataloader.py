@@ -3,6 +3,7 @@ from pathlib import Path
 import git
 import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
+
 class DataLoader:
 	"""A class to handle loading data files from a specified directory.
 
@@ -24,7 +25,8 @@ class DataLoader:
 	Methods
 	-------
 		`load_file(file: str)` -> `pd.DataFrame`: Load a single file from the data directory.
-		`load_all_files()` -> `None`: Load all the files in the data directory.
+		`load_all_files()` -> `None`: Load all the files in the data directory.¨
+		`clean_data()` -> `None`: Clean the data.
 	"""
 	def __init__(self, data_dir_path: str = "data", load_all_files: bool = False):
 		"""Initializes the DataLoader.
@@ -110,7 +112,6 @@ class DataLoader:
 		self.clean_entity_schedule()
 		self.clean_link_attraction_park()
 		self.clean_attendance()
-		pass
 
 	def clean_waiting_times(self):
 		df = self.waiting_times
@@ -177,14 +178,12 @@ class DataLoader:
 		columns_to_drop = ['dew_point','rain_1h','rain_3h','temp_min','temp_max','humidity', 'weather_icon','grnd_level','sea_level','visibility','dt','timezone','city_name','lat','lon','snow_1h','snow_3h','wind_deg','wind_gust','weather_id']
 		self.weather = self.weather.drop(columns=columns_to_drop)
 		self.weather = self.weather[(self.weather['dt_iso'].dt.year.isin([2018, 2019])) | (self.weather['dt_iso'].dt.year >= 2022)]
-		pass
 
 	def clean_parade_night_show(self):
 		"""
 		Clean the parade and night show data.
 		"""
 		self.parade_night_show = self.parade_night_show[(self.parade_night_show['WORK_DATE'] < '2020-01-01') | (self.parade_night_show['WORK_DATE'] >= '2022-01-01')]
-		pass
 
 	def clean_entity_schedule(self):
 		"""
@@ -192,14 +191,12 @@ class DataLoader:
 		"""
 		attractions = self.link_attraction_park['ATTRACTION'].tolist()
 		self.entity_schedule = self.entity_schedule[self.entity_schedule['ENTITY_DESCRIPTION_SHORT'].isin(attractions + ['PortAventura World'])]
-		pass
 
 	def clean_link_attraction_park(self):
 		"""
 		Clean the attraction-park mapping data.
 		"""
 		self.link_attraction_park = self.link_attraction_park[self.link_attraction_park['PARK'] == 'PortAventura World']
-		pass
 
 	def clean_attendance(self):
 		"""
