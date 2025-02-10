@@ -111,9 +111,12 @@ class DataLoader:
 		pass
 
 	def clean_weather(self):
-		"""
-		Clean the weather data.
-		"""
+		self.weather['dt_iso'] = pd.to_datetime(self.weather['dt_iso'], format='%Y-%m-%d %H:%M:%S %z UTC', errors='coerce')
+		self.weather['dt_iso'] = self.weather['dt_iso'].dt.tz_convert(None)
+		columns_to_drop = ['weather_icon','grnd_level','sea_level','visibility']  # Drop if empty
+		self.weather = self.weather.drop(columns=columns_to_drop)
+		self.weather = self.weather[(self.weather['dt_iso'].dt.year.isin([2018, 2019])) | (self.weather['dt_iso'].dt.year >= 2022)]
+		
 		pass
 
 	def clean_parade_night_show(self):
