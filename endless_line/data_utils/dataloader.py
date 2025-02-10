@@ -2,6 +2,8 @@ import os
 from pathlib import Path
 import git
 import pandas as pd
+import datetime
+
 class DataLoader:
 	"""A class to handle loading data files from a specified directory.
 
@@ -94,6 +96,8 @@ class DataLoader:
 		if file not in files:
 			raise ValueError(f"File {file} not found in {self.data_dir_path}")
 		if file.endswith(".csv"):
+			if file == "link_attraction_park.csv":
+				return pd.read_csv(os.path.join(self.data_dir_path, file), sep=";")
 			return pd.read_csv(os.path.join(self.data_dir_path, file))
 		elif file.endswith(".xlsx"):
 			return pd.read_excel(os.path.join(self.data_dir_path, file))
@@ -102,11 +106,11 @@ class DataLoader:
 		"""
   		Clean the data.
 		"""
+		self.clean_link_attraction_park() # pushed it to front. Given how we remove tivoli gardens data, it's better to put that here
 		self.clean_waiting_times()
 		self.clean_weather()
 		self.clean_parade_night_show()
 		self.clean_entity_schedule()
-		self.clean_link_attraction_park()
 		self.clean_attendance()
 		pass
 
@@ -129,6 +133,36 @@ class DataLoader:
 		Clean the parade and night show data.
 		"""
 		self.parade_night_show = self.parade_night_show[(self.parade_night_show['WORK_DATE'] < '2020-01-01') | (self.parade_night_show['WORK_DATE'] >= '2022-01-01')]
+		
+		# create 3 separate df for each parade type, in order to concat everything
+		parade_night_show_night_show = self.parade_night_show[["WORK_DATE", "NIGHT_SHOW"]].rename(columns={"NIGHT_SHOW": 'show_or_parade'})
+		parade_night_show_parade_1 = self.parade_night_show[["WORK_DATE", "PARADE_1"]].rename(columns={"PARADE_1": 'show_or_parade'})
+		parade_night_show_parade_2 = self.parade_night_show[["WORK_DATE", "PARADE_2"]].rename(columns={"PARADE_2": 'show_or_parade'})
+
+		parade_night_show_ = pd.concat([parade_night_show_night_show, parade_night_show_parade_1, parade_night_show_parade_2])
+		
+		# drop all rows of non-existing parades and shows (nan values)
+		parade_night_show_ = parade_night_show_.dropna(subset=['show_or_parade'])
+
+		# create 15min granularity (to join with other tables) on separate dataframes
+		# Careful: depending on how we join this with other table, it might mean that the parade is 30min or 45min long !!!!!
+		parade_night_show_15 = parade_night_show_.copy()
+		parade_night_show_30 = parade_night_show_.copy()
+		time_change_15 = datetime.timedelta(minutes=15)
+		time_change_30 = datetime.timedelta(minutes=30)
+		parade_night_show_15['show_or_parade'] = parade_night_show_15['show_or_parade'].apply(lambda t: (datetime.datetime.combine(datetime.date.today(),t) + time_change_15).time())
+		parade_night_show_30['show_or_parade'] = parade_night_show_30['show_or_parade'].apply(lambda t: (datetime.datetime.combine(datetime.date.today(),t) + time_change_30).time())
+		
+		# concat all the granular df into one
+		parade_night_show_granular = pd.concat([parade_night_show_, parade_night_show_15, parade_night_show_30])
+
+		# to merge this with time schedules, we need full datetimes (date + hour)
+		parade_night_show_granular_ = parade_night_show_granular.copy()
+		parade_night_show_granular_['show_or_parade'] = parade_night_show_granular_.apply(lambda row: pd.to_datetime(f"{row['WORK_DATE'].date()} {row['show_or_parade']}"), axis=1).astype('datetime64[s]')
+
+		parade_night_show_granular_['WORK_DATE'] = parade_night_show_granular_['WORK_DATE'].astype('datetime64[s]')
+
+		self.parade_night_show = parade_night_show_granular_.copy()
 		pass
 
 	def clean_entity_schedule(self):
@@ -137,6 +171,12 @@ class DataLoader:
 		"""
 		attractions = self.link_attraction_park['ATTRACTION'].tolist()
 		self.entity_schedule = self.entity_schedule[self.entity_schedule['ENTITY_DESCRIPTION_SHORT'].isin(attractions + ['PortAventura World'])]
+		
+		# modify date types
+		self.entity_schedule["DEB_TIME"] = self.entity_schedule["DEB_TIME"].astype("datetime64[s]")
+		self.entity_schedule["FIN_TIME"] = self.entity_schedule["FIN_TIME"].astype("datetime64[s]")
+		self.entity_schedule["UPDATE_TIME"] = self.entity_schedule["UPDATE_TIME"].astype("datetime64[s]")
+		self.entity_schedule["WORK_DATE"] = self.entity_schedule["WORK_DATE"].astype("datetime64[s]")
 		pass
 
 	def clean_link_attraction_park(self):
