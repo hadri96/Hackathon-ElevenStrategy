@@ -153,3 +153,45 @@ class DataLoader:
 		self.attendance = self.attendance[(self.attendance['USAGE_DATE'] < '2020-01-01') | (self.attendance['USAGE_DATE'] >= '2022-01-01')]
 		self.attendance = self.attendance[self.attendance['FACILITY_NAME'] == 'PortAventura World']
 		pass
+
+	def data_preprocessing(self):
+		"""
+		Preprocess the data.
+		"""
+		pass
+
+	def preprocess_waiting_times(self):
+		"""
+		Preprocess the data.
+		"""
+		pass
+
+	def preprocess_weather(self):
+		"""
+		Preprocess the data.
+		"""
+		pass
+
+	def preprocess_parade_night_show(self):
+		"""
+		Preprocess the data.
+		"""
+		pass
+
+	def preprocess_entity_schedule(self):
+		"""
+		Preprocess the data.
+		"""
+		pass
+
+	def preprocess_link_attraction_park(self):
+		"""
+		Preprocess the data.
+		"""
+		pass
+
+	def preprocess_attendance(self):
+		"""
+		Preprocess the data.
+		"""
+		pass
