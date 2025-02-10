@@ -73,7 +73,7 @@ class DataLoader:
 		self.link_attraction_park = pd.read_csv(os.path.join(self.data_dir_path, "link_attraction_park.csv"))
 		self.weather = pd.read_csv(os.path.join(self.data_dir_path, "weather_data.csv"))
 		self.waiting_times = pd.read_csv(os.path.join(self.data_dir_path, "waiting_times.csv"))
-		self.parade_night_show = pd.read_excel(os.path.join(self.data_dir_path, "parade_night_show.xlsx"))
+		self.parade_night_show = pd.read_excel(os.path.join(self.data_dir_path, "parade_night_show.xlsx"), index_col=0)
 
 	def load_file(self, file: str) -> pd.DataFrame:
 		"""Load the data from the data directory.
