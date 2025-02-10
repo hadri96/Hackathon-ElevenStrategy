@@ -127,6 +127,8 @@ class DataLoader:
 		"""
 		Clean the entity schedule data.
 		"""
+		attractions = self.link_attraction_park['ATTRACTION'].tolist()
+		self.entity_schedule = self.entity_schedule[self.entity_schedule['ENTITY_DESCRIPTION_SHORT'].isin(attractions + ['PortAventura World'])]
 		pass
 
 	def clean_link_attraction_park(self):
