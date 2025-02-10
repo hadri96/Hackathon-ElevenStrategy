@@ -111,10 +111,63 @@ class DataLoader:
 		pass
 
 	def clean_waiting_times(self):
+		df = self.waiting_times
 		"""
 		Clean the waiting times data.
+		Args:
+			df: pandas DataFrame with a 'WORK_DATE' column.
+
+		Returns:
+			pandas DataFrame: A new DataFrame with rows filtered based on 'WORK_DATE'.
+							Returns None if 'WORK_DATE' column is not found.
 		"""
-		pass
+
+		for col in df.columns:
+			if pd.api.types.is_numeric_dtype(df[col]): # Check if the column is numeric
+				negative_mask = df[col] < 0
+				df.loc[negative_mask, col] = 0
+
+		if 'WORK_DATE' not in df.columns:
+			print("Error: 'WORK_DATE' column not found in the DataFrame.")
+			return None
+
+		# Convert 'WORK_DATE' to datetime objects.
+		# Assuming 'WORK_DATE' is in DD/MM/YYYY format. Adjust format if necessary.
+		try:
+			df['WORK_DATE'] = pd.to_datetime(df['WORK_DATE'], format='%Y-%m-%d', errors='coerce')
+		except ValueError:
+			print("Error: Could not convert 'WORK_DATE' to datetime. Please check the date format in your 'WORK_DATE' column.")
+			return None
+
+		if df['WORK_DATE'].isnull().any():
+			print("Warning: Some 'WORK_DATE' values could not be converted to datetime and will be treated as NaT. Please check date formats.")
+
+
+		# Define the start and end dates for exclusion
+		start_date = pd.to_datetime('01/01/2020', format='%d/%m/%Y')
+		end_date = pd.to_datetime('31/12/2021', format='%d/%m/%Y')
+
+		# Filter the DataFrame to exclude rows within the specified date range
+		filtered_df = df[~((df['WORK_DATE'] >= start_date) & (df['WORK_DATE'] <= end_date))]
+
+		if 'GUEST_CARRIED' not in df.columns:
+			print("Error: 'GUEST_CARRIED' column not found in the DataFrame.")
+
+		# Calculate mean and standard deviation
+		mean_guest_carried = filtered_df['GUEST_CARRIED'].mean()
+		std_guest_carried = filtered_df['GUEST_CARRIED'].std()
+
+		# Define outlier boundaries (3 standard deviations from the mean)
+		upper_bound = mean_guest_carried + 5 * std_guest_carried
+
+		# Identify outliers
+		outlier_mask = (filtered_df['GUEST_CARRIED'] > upper_bound)
+
+		# Replace outliers with the mean
+		filtered_df.loc[outlier_mask, 'GUEST_CARRIED'] = mean_guest_carried
+
+		return filtered_df
+		
 
 	def clean_weather(self):
 		self.weather['dt_iso'] = pd.to_datetime(self.weather['dt_iso'], format='%Y-%m-%d %H:%M:%S %z UTC', errors='coerce')
