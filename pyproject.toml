@@ -1,0 +1,48 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "the-endless-line"
+version = "0.1.0"
+description = "A project to improve waiting times in queues for an amusement park"
+authors = [
+    { name = "Hadrien Morand", email = "hadrien.morand@student-cs.fr" },
+	{ name = "Jonathan Piscart", email = "jonathan.piscart@student-cs.fr" },
+	{ name = "Armand Chambaud", email = "armand.chambaud@student-cs.fr" },
+	{ name = "Henri Mayoud", email = "henri.mayoud@student-cs.fr" },
+	{ name = "Theo Van Eccelpoel", email = "theo.van-eccelpoel@student-cs.fr" },
+	{ name = "Kirandeep Gaur", email = "kirandeep.gaur@student-cs.fr" },
+]
+dependencies = [
+    "requests>=2.28.0",
+    "pandas>=1.5.0",
+	"numpy>=1.24.0",
+	"matplotlib>=3.7.0",
+	"scipy>=1.10.0",
+	"scikit-learn>=1.2.0",
+	"seaborn>=0.12.0",
+	"plotly>=5.15.0",
+	"gitpython>=3.1.0",
+]
+requires-python = ">=3.10"
+readme = "README.md"
+license = { text = "MIT" }
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "black>=22.0",
+    "isort>=5.0",
+]
+
+[tool.black]
+line-length = 88
+target-version = ["py310"]
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+
+[tool.hatch.build.targets.wheel]
+packages = ["endless_line"]
