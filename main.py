@@ -1,6 +1,20 @@
-from endless_line.data_utils.dataloader import DataLoader
+from endless_line.interface.app import create_app
+from dotenv import load_dotenv
+import os
+
+
+load_dotenv()
+
+app = create_app()
 
 if __name__ == "__main__":
-    dataloader = DataLoader()
-    data = dataloader.load_data(".csv")
-    print(data)
+    app.run(debug=True)
+
+
+
+
+
+
+
+
+
