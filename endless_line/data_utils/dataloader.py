@@ -138,5 +138,6 @@ class DataLoader:
 		"""
 		Clean the attendance data.
 		"""
-		# I'm working on this don't touch
+		self.attendance = self.attendance[(self.attendance['USAGE_DATE'] < '2020-01-01') | (self.attendance['USAGE_DATE'] >= '2022-01-01')]
+		self.attendance = self.attendance[self.attendance['FACILITY_NAME'] == 'PortAventura World']
 		pass
