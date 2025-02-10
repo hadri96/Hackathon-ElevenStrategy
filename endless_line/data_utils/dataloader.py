@@ -119,7 +119,7 @@ class DataLoader:
 	def clean_weather(self):
 		self.weather['dt_iso'] = pd.to_datetime(self.weather['dt_iso'], format='%Y-%m-%d %H:%M:%S %z UTC', errors='coerce')
 		self.weather['dt_iso'] = self.weather['dt_iso'].dt.tz_convert(None)
-		columns_to_drop = ['dew_point','temp_min','humidity', 'weather_icon','grnd_level','sea_level','visibility','dt','timezone','city_name','lat','lon','snow_1h','snow_3h','wind_deg','wind_gust','weather_id']
+		columns_to_drop = ['dew_point','temp_min','temp_max','humidity', 'weather_icon','grnd_level','sea_level','visibility','dt','timezone','city_name','lat','lon','snow_1h','snow_3h','wind_deg','wind_gust','weather_id']
 		self.weather = self.weather.drop(columns=columns_to_drop)
 		self.weather = self.weather[(self.weather['dt_iso'].dt.year.isin([2018, 2019])) | (self.weather['dt_iso'].dt.year >= 2022)]
 		pass
@@ -152,6 +152,7 @@ class DataLoader:
 		"""
 		self.attendance = self.attendance[(self.attendance['USAGE_DATE'] < '2020-01-01') | (self.attendance['USAGE_DATE'] >= '2022-01-01')]
 		self.attendance = self.attendance[self.attendance['FACILITY_NAME'] == 'PortAventura World']
+		self.attendance['USAGE_DATE'] = pd.to_datetime(self.attendance['USAGE_DATE'])
 		pass
 
 	def data_preprocessing(self):
