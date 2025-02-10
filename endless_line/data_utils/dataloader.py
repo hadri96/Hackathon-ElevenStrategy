@@ -70,12 +70,10 @@ class DataLoader:
 		"""
 		self.attendance = pd.read_csv(os.path.join(self.data_dir_path, "attendance.csv"))
 		self.entity_schedule = pd.read_csv(os.path.join(self.data_dir_path, "entity_schedule.csv"))
-		self.link_attraction_park = pd.read_csv(os.path.join(self.data_dir_path, "link_attraction_park.csv"))
+		self.link_attraction_park = pd.read_csv(os.path.join(self.data_dir_path, "link_attraction_park.csv"), sep=";")
 		self.weather = pd.read_csv(os.path.join(self.data_dir_path, "weather_data.csv"))
 		self.waiting_times = pd.read_csv(os.path.join(self.data_dir_path, "waiting_times.csv"))
 		self.parade_night_show = pd.read_excel(os.path.join(self.data_dir_path, "parade_night_show.xlsx"), index_col=0)
-
-		
 
 	def load_file(self, file: str) -> pd.DataFrame:
 		"""Load the data from the data directory.
@@ -122,6 +120,7 @@ class DataLoader:
 		"""
 		Clean the parade and night show data.
 		"""
+		self.parade_night_show = self.parade_night_show[(self.parade_night_show['WORK_DATE'] < '2020-01-01') | (self.parade_night_show['WORK_DATE'] >= '2022-01-01')]
 		pass
 
 	def clean_entity_schedule(self):
@@ -134,6 +133,7 @@ class DataLoader:
 		"""
 		Clean the attraction-park mapping data.
 		"""
+		self.link_attraction_park = self.link_attraction_park[self.link_attraction_park['PARK'] == 'PortAventura World']
 		pass
 
 	def clean_attendance(self):
