@@ -2,7 +2,7 @@ from dash import html, dcc
 import dash_bootstrap_components as dbc
 
 def create_feature_card(title, description, icon, link):
-    """Create a feature card with clean design"""
+    """Create a feature card with hover effect only"""
     return dbc.Card([
         dbc.CardBody([
             html.Div([
@@ -20,21 +20,14 @@ def create_feature_card(title, description, icon, link):
                 )
             ], className="text-center")
         ], className="p-4")
-    ], className="h-100 shadow-sm card-clean floating")
+    ], className="h-100 shadow-sm card-clean")  # Removed floating class
 
 layout = html.Div([
-    # Animated background lights
-    html.Div(className="light x1"),
-    html.Div(className="light x2"),
-    html.Div(className="light x3"),
-    html.Div(className="light x4"),
-    html.Div(className="light x5"),
-    html.Div(className="light x6"),
-    html.Div(className="light x7"),
+    # Background pattern container
+    html.Div(className="background-container"),
 
-    # Main content
     dbc.Container([
-        # Hero Section
+        # Hero Section - removed any extra spacing
         dbc.Row([
             dbc.Col([
                 html.Div([
@@ -46,9 +39,18 @@ layout = html.Div([
                         "Your AI-powered companion for the perfect theme park experience",
                         className="lead text-center mb-5 fade-in"
                     ),
-                ], className="py-5")
+                ], className="py-4")  # Reduced padding
             ], width=12)
-        ]),
+        ], className="g-0"),  # Remove gutter
+
+        # Animated background lights
+        html.Div(className="light x1"),
+        html.Div(className="light x2"),
+        html.Div(className="light x3"),
+        html.Div(className="light x4"),
+        html.Div(className="light x5"),
+        html.Div(className="light x6"),
+        html.Div(className="light x7"),
 
         # Feature Cards
         dbc.Row([
@@ -93,5 +95,5 @@ layout = html.Div([
                 ], className="text-center text-muted fade-in")
             ], width=12)
         ])
-    ], fluid=True, className="py-4 position-relative")
+    ], fluid=True, className="p-0")  # Remove container padding
 ], className="home-container")

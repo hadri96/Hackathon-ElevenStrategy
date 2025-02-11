@@ -75,3 +75,24 @@
 .h-100 {
 	padding: 0 15px;
 }
+
+/* Filter menu container */
+.filter-menu {
+	position: fixed;
+	top: 56px;  /* Height of navbar */
+	left: -320px;  /* Increased from -300px */
+	width: 320px;  /* Increased from 300px (approximately 1cm wider) */
+	height: calc(100vh - 56px);
+	background: rgba(255, 255, 255, 0.95);
+	backdrop-filter: blur(10px);
+	transition: left 0.3s ease;
+	z-index: 1000;
+	overflow-y: auto;
+	padding: 2rem;
+	box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Show filter menu when active */
+.filter-menu.active {
+	left: 0;
+}

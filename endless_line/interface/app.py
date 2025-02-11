@@ -53,36 +53,7 @@ app.index_string = '''
     </head>
     <body>
         <div class="background-container">
-            <div class="light x1"></div>
-            <div class="light x2"></div>
-            <div class="light x3"></div>
-            <div class="light x4"></div>
-            <div class="light x5"></div>
-            <div class="light x6"></div>
-            <div class="light x7"></div>
-            <div class="light x8"></div>
-            <div class="light x9"></div>
-            <div class="light x10"></div>
-            <div class="light x11"></div>
-            <div class="light x12"></div>
-            <div class="light x13"></div>
-            <div class="light x14"></div>
-            <div class="light x15"></div>
-            <div class="light x16"></div>
-            <div class="light x17"></div>
-            <div class="light x18"></div>
-            <div class="light x19"></div>
-            <div class="light x20"></div>
-            <div class="light x21"></div>
-            <div class="light x22"></div>
-            <div class="light x23"></div>
-            <div class="light x24"></div>
-            <div class="light x25"></div>
-            <div class="light x26"></div>
-            <div class="light x27"></div>
-            <div class="light x28"></div>
-            <div class="light x29"></div>
-            <div class="light x30"></div>
+            ''' + '\n            '.join([f'<div class="light x{i}"></div>' for i in range(1, 61)]) + '''
         </div>
         {%app_entry%}
         <footer>
