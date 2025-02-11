@@ -263,6 +263,7 @@ class DataLoader:
 		Preprocess the data.
 		"""
 		self.preprocess_weather()
+		self.preprocess_attendance()
 		pass
 
 	def preprocess_waiting_times(self):
@@ -306,6 +307,8 @@ class DataLoader:
 		self.weather['day'] = self.weather['dt_iso'].dt.day
 		self.weather['month'] = self.weather['dt_iso'].dt.month
 		self.weather['day_of_year'] = self.weather['dt_iso'].dt.dayofyear
+		self.weather.loc[self.weather['USAGE_DATE'].dt.year.isin([2018, 2019]), 'USAGE_DATE'] += pd.DateOffset(years=2)
+
 
 
 	def preprocess_parade_night_show(self):
