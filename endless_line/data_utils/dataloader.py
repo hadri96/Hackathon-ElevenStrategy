@@ -302,11 +302,12 @@ class DataLoader:
 		num_cols = ['temp', 'feels_like', 'pressure', 'wind_speed', 'clouds_all']
 		self.weather[num_cols] = scaler.fit_transform(self.weather[num_cols])
 
-		# Create additional time-based features
-		self.weather['hour'] = self.weather['dt_iso'].self.weather.hour
-		self.weather['day'] = self.weather['dt_iso'].self.weather.day
-		self.weather['month'] = self.weather['dt_iso'].self.weather.month
-		self.weather['day_of_year'] = self.weather['dt_iso'].self.weather.dayofyear
+		self.weather['hour'] = self.weather['dt_iso'].dt.hour
+		self.weather['day'] = self.weather['dt_iso'].dt.day
+		self.weather['month'] = self.weather['dt_iso'].dt.month
+		self.weather['day_of_year'] = self.weather['dt_iso'].dt.dayofyear
+
+
 
 
 	def preprocess_parade_night_show(self):
