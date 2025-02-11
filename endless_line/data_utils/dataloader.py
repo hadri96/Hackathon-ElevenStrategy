@@ -3,7 +3,7 @@ from pathlib import Path
 import git
 import pandas as pd
 import datetime
-from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import MinMaxScaler, LabelEncoder
 
 
 class DataLoader:
@@ -119,9 +119,63 @@ class DataLoader:
 
 	def clean_waiting_times(self):
 		"""
-		Clean the waiting times data.
+		Filters a pandas DataFrame 'waiting_times' to exclude rows where 'WORK_DATE'
+		falls between '01/01/2020' and '31/12/2021' (inclusive).
+
+		Args:
+			df: pandas DataFrame with a 'WORK_DATE' column.
+
+		Returns:
+			pandas DataFrame: A new DataFrame with rows filtered based on 'WORK_DATE'.
+							Returns None if 'WORK_DATE' column is not found.
 		"""
-		pass
+		df = self.waiting_times
+
+		for col in df.columns:
+			if pd.api.types.is_numeric_dtype(df[col]): # Check if the column is numeric
+				negative_mask = df[col] < 0
+				df.loc[negative_mask, col] = 0
+
+		if 'WORK_DATE' not in df.columns:
+			print("Error: 'WORK_DATE' column not found in the DataFrame.")
+			return None
+
+		# Convert 'WORK_DATE' to datetime objects.
+		# Assuming 'WORK_DATE' is in DD/MM/YYYY format. Adjust format if necessary.
+		try:
+			df['WORK_DATE'] = pd.to_datetime(df['WORK_DATE'], format='%Y-%m-%d', errors='coerce')
+		except ValueError:
+			print("Error: Could not convert 'WORK_DATE' to datetime. Please check the date format in your 'WORK_DATE' column.")
+			return None
+
+		if df['WORK_DATE'].isnull().any():
+			print("Warning: Some 'WORK_DATE' values could not be converted to datetime and will be treated as NaT. Please check date formats.")
+
+
+		# Define the start and end dates for exclusion
+		start_date = pd.to_datetime('01/01/2020', format='%d/%m/%Y')
+		end_date = pd.to_datetime('31/12/2021', format='%d/%m/%Y')
+
+		# Filter the DataFrame to exclude rows within the specified date range
+		filtered_df = df[~((df['WORK_DATE'] >= start_date) & (df['WORK_DATE'] <= end_date))]
+
+		if 'GUEST_CARRIED' not in df.columns:
+			print("Error: 'GUEST_CARRIED' column not found in the DataFrame.")
+
+		# Calculate mean and standard deviation
+		mean_guest_carried = filtered_df['GUEST_CARRIED'].mean()
+		std_guest_carried = filtered_df['GUEST_CARRIED'].std()
+
+		# Define outlier boundaries (3 standard deviations from the mean)
+		upper_bound = mean_guest_carried + 5 * std_guest_carried
+
+		# Identify outliers
+		outlier_mask = (filtered_df['GUEST_CARRIED'] > upper_bound)
+
+		# Replace outliers with the mean
+		filtered_df.loc[outlier_mask, 'GUEST_CARRIED'] = mean_guest_carried
+
+		self.waiting_times = filtered_df
 
 	def clean_weather(self):
 		self.weather['dt_iso'] = pd.to_datetime(
@@ -208,6 +262,7 @@ class DataLoader:
 		"""
 		Preprocess the data.
 		"""
+		self.preprocess_weather()
 		self.preprocess_attendance()
 		pass
 
@@ -225,7 +280,42 @@ class DataLoader:
 		Preprocess the data.
 		"""
 		self.weather.loc[self.weather['dt_iso'].dt.year.isin([2018, 2019]), 'dt_iso'] += pd.DateOffset(years=2)
-		pass
+		label_enc_main = LabelEncoder()
+		label_enc_desc = LabelEncoder()
+
+		weather_mapping = {
+			'sky is clear': 0,
+			'few clouds': 1,
+			'scattered clouds': 2,
+			'broken clouds': 3,
+			'overcast clouds': 4,
+			'light rain': 5,
+			'moderate rain': 6,
+			'heavy intensity rain': 7,
+			'light snow': 8,
+			'snow': 9
+		}
+
+		self.weather['weather_description_encoded'] = self.weather['weather_description'].map(weather_mapping)
+		self.weather['weather_main_encoded'] = label_enc_main.fit_transform(self.weather['weather_main'])
+
+		# Drop original categorical columns
+		self.weather.drop(columns=['weather_main', 'weather_description'], inplace=True)
+
+		# Normalize numerical columns
+		scaler = MinMaxScaler()
+		num_cols = ['temp', 'feels_like', 'pressure', 'wind_speed', 'clouds_all']
+		self.weather[num_cols] = scaler.fit_transform(self.weather[num_cols])
+
+		self.weather.loc[self.weather['dt_iso'].dt.year.isin([2018, 2019]), 'dt_iso'] += pd.DateOffset(years=2)
+
+		self.weather['hour'] = self.weather['dt_iso'].dt.hour
+		self.weather['day'] = self.weather['dt_iso'].dt.day
+		self.weather['month'] = self.weather['dt_iso'].dt.month
+		self.weather['day_of_week'] = self.weather['dt_iso'].dt.dayofweek
+		self.weather.loc[self.weather['dt_iso'].dt.year.isin([2018, 2019]), 'dt_iso'] += pd.DateOffset(years=2)
+
+
 
 	def preprocess_parade_night_show(self):
 		"""
@@ -255,10 +345,18 @@ class DataLoader:
 	def preprocess_attendance(self):
 		self.attendance['USAGE_DATE'] = pd.to_datetime(self.attendance['USAGE_DATE'])
 		self.attendance.drop_duplicates(inplace=True)
-		#Standardadising the attendance data beteen 0 to 1 using MinMaxScaler
-		scaler = MinMaxScaler()
-		self.attendance['attendance_normalized'] = scaler.fit_transform(self.attendance[['attendance']])
+		self.attendance.drop(columns=['FACILITY_NAME'], inplace=True)
 		#changing the date of the data to falsify 2021 and 2020 data to accomodate the model
 		# Add 2 years to rows with year 2018 and 2019
 		self.attendance.loc[self.attendance['USAGE_DATE'].dt.year.isin([2018, 2019]), 'USAGE_DATE'] += pd.DateOffset(years=2)
 	
+
+	def data_preprocessing_attendance_pred(self):
+		"""
+		Preprocess the data for the attedance prediction model.
+		"""
+		self.data_preprocessing()
+		self.weather.drop(columns=['hour'], inplace=True)
+		self.weather = self.weather[self.weather['dt_iso'].dt.hour == 12].copy()
+		self.weather['dt_iso'] = self.weather['dt_iso'].dt.date
+		pass
