@@ -208,30 +208,42 @@ class DataLoader:
 		"""
 		Preprocess the data.
 		"""
+		self.preprocess_attendance()
 		pass
 
 	def preprocess_waiting_times(self):
 		"""
 		Preprocess the data.
 		"""
+		self.waiting_times.loc[self.waiting_times['WORK_DATE'].dt.year.isin([2018, 2019]), 'WORK_DATE'] += pd.DateOffset(years=2)
+		self.waiting_times.loc[self.waiting_times['DEB_TIME'].dt.year.isin([2018, 2019]), 'DEB_TIME'] += pd.DateOffset(years=2)
+		self.waiting_times.loc[self.waiting_times['FIN_TIME'].dt.year.isin([2018, 2019]), 'FIN_TIME'] += pd.DateOffset(years=2)
 		pass
 
 	def preprocess_weather(self):
 		"""
 		Preprocess the data.
 		"""
+		self.weather.loc[self.weather['dt_iso'].dt.year.isin([2018, 2019]), 'dt_iso'] += pd.DateOffset(years=2)
 		pass
 
 	def preprocess_parade_night_show(self):
 		"""
 		Preprocess the data.
 		"""
+		self.parade_night_show.loc[self.parade_night_show['show_or_para'].dt.year.isin([2018, 2019]), 'show_or_para'] += pd.DateOffset(years=2)
+		self.parade_night_show.loc[self.parade_night_show['WORK_DATE'].dt.year.isin([2018, 2019]), 'WORK_DATE'] += pd.DateOffset(years=2)
 		pass
 
 	def preprocess_entity_schedule(self):
 		"""
 		Preprocess the data.
+	
 		"""
+		self.entity_schedule.loc[self.entity_schedule['DEB_TIME'].dt.year.isin([2018, 2019]), 'DEB_TIME'] += pd.DateOffset(years=2)
+		self.entity_schedule.loc[self.entity_schedule['FIN_TIME'].dt.year.isin([2018, 2019]), 'FIN_TIME'] += pd.DateOffset(years=2)
+		self.entity_schedule.loc[self.entity_schedule['UPDATE_TIME'].dt.year.isin([2018, 2019]), 'UPDATE_TIME'] += pd.DateOffset(years=2)
+		self.entity_schedule.loc[self.entity_schedule['WORK_DATE'].dt.year.isin([2018, 2019]), 'WORK_DATE'] += pd.DateOffset(years=2)
 		pass
 
 	def preprocess_link_attraction_park(self):
