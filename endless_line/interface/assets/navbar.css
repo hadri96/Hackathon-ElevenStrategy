@@ -1,0 +1,38 @@
+/* Navbar styling */
+.navbar-custom {
+	padding: 0.5rem 1rem;
+	background-color: #ffffff !important;
+	border-bottom: 1px solid #e9ecef;
+	margin-bottom: 2rem;
+}
+
+.nav-link-custom {
+	color: #495057 !important;
+	padding: 0.5rem 1rem !important;
+	border-radius: 4px;
+	margin: 0 0.2rem;
+	transition: all 0.3s ease;
+}
+
+.nav-link-custom:hover {
+	background-color: #f8f9fa;
+	color: #0d6efd !important;
+}
+
+.nav-link-custom.active {
+	color: #0d6efd !important;
+	background-color: #e9ecef;
+}
+
+/* Brand/logo styling */
+.navbar-brand {
+	color: #495057 !important;
+	font-weight: 500;
+	font-size: 1.25rem;
+}
+
+/* Container styling */
+.container-fluid {
+	max-width: 1400px;
+	margin: 0 auto;
+}
