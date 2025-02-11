@@ -208,6 +208,7 @@ class DataLoader:
 		"""
 		Preprocess the data.
 		"""
+		self.preprocess_weather()
 		pass
 
 	def preprocess_waiting_times(self):
@@ -220,7 +221,39 @@ class DataLoader:
 		"""
 		Preprocess the data.
 		"""
-		pass
+		label_enc_main = LabelEncoder()
+		label_enc_desc = LabelEncoder()
+
+		weather_mapping = {
+			'sky is clear': 0,
+			'few clouds': 1,
+			'scattered clouds': 2,
+			'broken clouds': 3,
+			'overcast clouds': 4,
+			'light rain': 5,
+			'moderate rain': 6,
+			'heavy intensity rain': 7,
+			'light snow': 8,
+			'snow': 9
+		}
+
+		self.weather['weather_description_encoded'] = self.weather['weather_description'].map(weather_mapping)
+		self.weather['weather_main_encoded'] = label_enc_main.fit_transform(self.weather['weather_main'])
+
+		# Drop original categorical columns
+		self.weather.drop(columns=['weather_main', 'weather_description'], inplace=True)
+
+		# Normalize numerical columns
+		scaler = MinMaxScaler()
+		num_cols = ['temp', 'feels_like', 'pressure', 'wind_speed', 'clouds_all']
+		self.weather[num_cols] = scaler.fit_transform(df[num_cols])
+
+		# Create additional time-based features
+		self.weather['hour'] = self.weather['dt_iso'].self.weather.hour
+		self.weather['day'] = self.weather['dt_iso'].self.weather.day
+		self.weather['month'] = self.weather['dt_iso'].self.weather.month
+		self.weather['day_of_year'] = self.weather['dt_iso'].self.weather.dayofyear
+
 
 	def preprocess_parade_night_show(self):
 		"""
