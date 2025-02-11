@@ -279,7 +279,6 @@ class DataLoader:
 		"""
 		Preprocess the data.
 		"""
-		self.weather.loc[self.weather['dt_iso'].dt.year.isin([2018, 2019]), 'dt_iso'] += pd.DateOffset(years=2)
 		label_enc_main = LabelEncoder()
 		label_enc_desc = LabelEncoder()
 
