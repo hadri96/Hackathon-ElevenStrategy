@@ -18,8 +18,8 @@ class WeatherForecast:
 	def get_forecast(self, lat: float=48.873492, lon: float=2.295104):
 		url = 'https://api.openweathermap.org/data/2.5/forecast?'
 		params = {
-					'lat': self.lat,
-					'lon': self.lon,
+					'lat': lat,
+					'lon': lon,
 					'units': 'metric',
 					'appid': self.weather_api_key
 		}
@@ -63,7 +63,7 @@ class WeatherForecast:
 		forecast_df['dt_txt'] = pd.to_datetime(forecast_df['dt_txt'], format='%Y-%m-%d %H:%M:%S')
 		forecast_df.rename(columns={'dt_txt': 'dt_iso'}, inplace=True)
 		# Resample and interpolate 3-hourly data to hourly data with forward fill
-		forecast_df = forecast_df.set_index('dt_txt').resample('h').interpolate(method='ffill', limit_direction='forward')
+		forecast_df = forecast_df.set_index('dt_iso').resample('h').interpolate(method='ffill', limit_direction='forward')
 		forecast_df.reset_index(inplace=True)
 		## TO DO CHECK OPENING TIMES OF PARK AND REMOVE DATA OUTSIDE OF OPENING TIMES
 		return forecast_df
