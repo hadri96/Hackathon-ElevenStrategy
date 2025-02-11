@@ -303,11 +303,13 @@ class DataLoader:
 		num_cols = ['temp', 'feels_like', 'pressure', 'wind_speed', 'clouds_all']
 		self.weather[num_cols] = scaler.fit_transform(self.weather[num_cols])
 
+		self.weather.loc[self.weather['dt_iso'].dt.year.isin([2018, 2019]), 'dt_iso'] += pd.DateOffset(years=2)
+
 		self.weather['hour'] = self.weather['dt_iso'].dt.hour
 		self.weather['day'] = self.weather['dt_iso'].dt.day
 		self.weather['month'] = self.weather['dt_iso'].dt.month
 		self.weather['day_of_year'] = self.weather['dt_iso'].dt.dayofyear
-		self.weather.loc[self.weather['USAGE_DATE'].dt.year.isin([2018, 2019]), 'USAGE_DATE'] += pd.DateOffset(years=2)
+		self.weather.loc[self.weather['dt_iso'].dt.year.isin([2018, 2019]), 'dt_iso'] += pd.DateOffset(years=2)
 
 
 
