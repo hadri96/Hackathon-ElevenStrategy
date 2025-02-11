@@ -10,7 +10,7 @@ class WeatherForecast:
 		Initialize the WeatherForecast class.
 		"""
 		data = DataLoader()
-		if load_dotenv(os.path.join(data.root_dir, '.secret')):
+		if load_dotenv(os.path.join(data.root_dir, '.secret')) or os.getenv("OPENWEATHERMAP_API_KEY"):
 			self.weather_api_key = os.getenv("OPENWEATHERMAP_API_KEY")
 		else:
 			raise ValueError(".secret file not found, please create .secret file in the root directory with your API keys")
