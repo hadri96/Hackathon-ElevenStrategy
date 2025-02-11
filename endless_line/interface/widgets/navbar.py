@@ -31,6 +31,13 @@ def create_navbar():
                 className="nav-link-custom"
             )
         ),
+        dbc.NavItem(
+            dbc.NavLink(
+                "When Should I Go?",
+                href="/when",
+                className="nav-link-custom"
+            )
+        ),
     ]
 
     # Create the navbar
