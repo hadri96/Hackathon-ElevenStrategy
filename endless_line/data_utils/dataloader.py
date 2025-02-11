@@ -3,6 +3,8 @@ from pathlib import Path
 import git
 import pandas as pd
 import datetime
+from sklearn.preprocessing import MinMaxScaler
+
 
 class DataLoader:
 	"""A class to handle loading data files from a specified directory.
@@ -25,7 +27,8 @@ class DataLoader:
 	Methods
 	-------
 		`load_file(file: str)` -> `pd.DataFrame`: Load a single file from the data directory.
-		`load_all_files()` -> `None`: Load all the files in the data directory.
+		`load_all_files()` -> `None`: Load all the files in the data directory.¨
+		`clean_data()` -> `None`: Clean the data.
 	"""
 	def __init__(self, data_dir_path: str = "data", load_all_files: bool = False):
 		"""Initializes the DataLoader.
@@ -46,6 +49,7 @@ class DataLoader:
 		self.data_dir_path = os.path.join(self.root_dir, data_dir_path)
 		if load_all_files:
 			self._load_all_files()
+		
 
 	def _find_git_root(self) -> str:
 		"""Find the root directory of the git repository.
@@ -112,7 +116,6 @@ class DataLoader:
 		self.clean_parade_night_show()
 		self.clean_entity_schedule()
 		self.clean_attendance()
-		pass
 
 	def clean_waiting_times(self):
 		"""
@@ -121,12 +124,21 @@ class DataLoader:
 		pass
 
 	def clean_weather(self):
-		self.weather['dt_iso'] = pd.to_datetime(self.weather['dt_iso'], format='%Y-%m-%d %H:%M:%S %z UTC', errors='coerce')
-		self.weather['dt_iso'] = self.weather['dt_iso'].dt.tz_convert(None)
-		columns_to_drop = ['dew_point','temp_min','humidity', 'weather_icon','grnd_level','sea_level','visibility','dt','timezone','city_name','lat','lon','snow_1h','snow_3h','wind_deg','wind_gust','weather_id']
-		self.weather = self.weather.drop(columns=columns_to_drop)
-		self.weather = self.weather[(self.weather['dt_iso'].dt.year.isin([2018, 2019])) | (self.weather['dt_iso'].dt.year >= 2022)]
-		pass
+		self.weather['dt_iso'] = pd.to_datetime(
+			self.weather['dt_iso'], format='%Y-%m-%d %H:%M:%S %z UTC', errors='coerce'
+		)
+		self.weather['dt_iso'] = self.weather['dt_iso'].dt.tz_localize(None)
+
+		columns_to_drop = [
+			'dew_point', 'temp_min', 'temp_max', 'humidity', 'weather_icon', 'rain_1h', 
+			'rain_3h', 'grnd_level', 'sea_level', 'visibility', 'dt', 'timezone', 
+			'city_name', 'lat', 'lon', 'snow_1h', 'snow_3h', 'wind_deg', 'wind_gust', 'weather_id'
+		]
+
+		self.weather = self.weather.drop(columns=columns_to_drop, errors='ignore')
+		self.weather = self.weather[
+			(self.weather['dt_iso'].dt.year.isin([2018, 2019])) | (self.weather['dt_iso'].dt.year >= 2022)
+		]
 
 	def clean_parade_night_show(self):
 		"""
@@ -163,7 +175,6 @@ class DataLoader:
 		parade_night_show_granular_['WORK_DATE'] = parade_night_show_granular_['WORK_DATE'].astype('datetime64[s]')
 
 		self.parade_night_show = parade_night_show_granular_.copy()
-		pass
 
 	def clean_entity_schedule(self):
 		"""
@@ -177,14 +188,13 @@ class DataLoader:
 		self.entity_schedule["FIN_TIME"] = self.entity_schedule["FIN_TIME"].astype("datetime64[s]")
 		self.entity_schedule["UPDATE_TIME"] = self.entity_schedule["UPDATE_TIME"].astype("datetime64[s]")
 		self.entity_schedule["WORK_DATE"] = self.entity_schedule["WORK_DATE"].astype("datetime64[s]")
-		pass
+
 
 	def clean_link_attraction_park(self):
 		"""
 		Clean the attraction-park mapping data.
 		"""
 		self.link_attraction_park = self.link_attraction_park[self.link_attraction_park['PARK'] == 'PortAventura World']
-		pass
 
 	def clean_attendance(self):
 		"""
@@ -192,7 +202,7 @@ class DataLoader:
 		"""
 		self.attendance = self.attendance[(self.attendance['USAGE_DATE'] < '2020-01-01') | (self.attendance['USAGE_DATE'] >= '2022-01-01')]
 		self.attendance = self.attendance[self.attendance['FACILITY_NAME'] == 'PortAventura World']
-		pass
+		self.attendance['USAGE_DATE'] = pd.to_datetime(self.attendance['USAGE_DATE'])
 
 	def data_preprocessing(self):
 		"""
@@ -231,7 +241,12 @@ class DataLoader:
 		pass
 
 	def preprocess_attendance(self):
-		"""
-		Preprocess the data.
-		"""
-		pass
+		self.attendance['USAGE_DATE'] = pd.to_datetime(self.attendance['USAGE_DATE'])
+		self.attendance.drop_duplicates(inplace=True)
+		#Standardadising the attendance data beteen 0 to 1 using MinMaxScaler
+		scaler = MinMaxScaler()
+		self.attendance['attendance_normalized'] = scaler.fit_transform(self.attendance[['attendance']])
+		#changing the date of the data to falsify 2021 and 2020 data to accomodate the model
+		# Add 2 years to rows with year 2018 and 2019
+		self.attendance.loc[self.attendance['USAGE_DATE'].dt.year.isin([2018, 2019]), 'USAGE_DATE'] += pd.DateOffset(years=2)
+	
