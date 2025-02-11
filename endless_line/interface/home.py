@@ -52,7 +52,7 @@ layout = dbc.Container([
                 "When Should I Go?",
                 "Plan your perfect visit with our AI recommendations. Get personalized suggestions for the best days and times to visit based on your preferences.",
                 "fa-calendar-check",
-                "/when-to-go"
+                "/when"
             )
         ], width=12, md=4, className="mb-4"),
 
