@@ -28,10 +28,6 @@ app = dash.Dash(
     external_stylesheets=[
         dbc.themes.BOOTSTRAP,
         'https://use.fontawesome.com/releases/v6.4.0/css/all.css',
-        'https://unpkg.com/aos@2.3.1/dist/aos.css'
-    ],
-    external_scripts=[
-        'https://unpkg.com/aos@2.3.1/dist/aos.js'
     ],
     assets_folder=os.path.join(data_loader.root_dir,'endless_line', 'interface', 'assets')
 )

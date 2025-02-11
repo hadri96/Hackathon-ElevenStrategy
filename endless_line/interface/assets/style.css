@@ -32,3 +32,21 @@ p {
 	transform: translateY(-5px);
 	box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
 }
+
+/* Make page content background transparent */
+#page-content {
+    background: transparent !important;
+    position: relative;
+    z-index: 1;  /* Lower than navbar but higher than background */
+}
+
+/* Ensure navbar stays on top */
+.navbar {
+    position: relative;
+    z-index: 3;  /* Higher than page-content */
+}
+
+/* Background should be at the bottom layer */
+.background-container {
+    z-index: 1;  /* Lowest z-index */
+}
