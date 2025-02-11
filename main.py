@@ -3,7 +3,7 @@ import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output, State
 from endless_line.interface import home, about, dashboard
 from endless_line.interface.widgets.navbar import create_navbar
-from endless_line.interface.app import app
+from endless_line.interface.app import app, server
   # import page layouts
 
 # Define the main menu or navigation bar (optional)
