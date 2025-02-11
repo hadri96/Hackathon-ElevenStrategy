@@ -18,8 +18,8 @@ class WeatherForecast:
 	def get_forecast(self, lat: float=48.873492, lon: float=2.295104):
 		url = 'https://api.openweathermap.org/data/2.5/forecast?'
 		params = {
-					'lat': self.lat,
-					'lon': self.lon,
+					'lat': lat,
+					'lon': lon,
 					'units': 'metric',
 					'appid': self.weather_api_key
 		}

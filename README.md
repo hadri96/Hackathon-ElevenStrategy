@@ -16,9 +16,9 @@ pip install -e .
 
 
 
-To update with the latest changes, please run
+To update with the latest changes, please just re-run
 
 ```bash
-git pull origin master && pip uninstall the-endless-line && pip install -e .
+pip install -e .
 ```
 
