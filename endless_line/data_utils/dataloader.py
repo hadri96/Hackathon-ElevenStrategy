@@ -308,7 +308,7 @@ class DataLoader:
 		self.weather['hour'] = self.weather['dt_iso'].dt.hour
 		self.weather['day'] = self.weather['dt_iso'].dt.day
 		self.weather['month'] = self.weather['dt_iso'].dt.month
-		self.weather['day_of_year'] = self.weather['dt_iso'].dt.dayofyear
+		self.weather['day_of_week'] = self.weather['dt_iso'].dt.dayofweek
 		self.weather.loc[self.weather['dt_iso'].dt.year.isin([2018, 2019]), 'dt_iso'] += pd.DateOffset(years=2)
 
 
