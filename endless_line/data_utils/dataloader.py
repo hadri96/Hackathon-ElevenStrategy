@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 import git
 import pandas as pd
+from sklearn.preprocessing import MinMaxScaler
 
 class DataLoader:
 	"""A class to handle loading data files from a specified directory.
@@ -46,6 +47,7 @@ class DataLoader:
 		self.data_dir_path = os.path.join(self.root_dir, data_dir_path)
 		if load_all_files:
 			self._load_all_files()
+		
 
 	def _find_git_root(self) -> str:
 		"""Find the root directory of the git repository.
@@ -112,15 +114,68 @@ class DataLoader:
 		self.clean_attendance()
 
 	def clean_waiting_times(self):
+		df = self.waiting_times
 		"""
 		Clean the waiting times data.
+		Args:
+			df: pandas DataFrame with a 'WORK_DATE' column.
+
+		Returns:
+			pandas DataFrame: A new DataFrame with rows filtered based on 'WORK_DATE'.
+							Returns None if 'WORK_DATE' column is not found.
 		"""
-		pass
+
+		for col in df.columns:
+			if pd.api.types.is_numeric_dtype(df[col]): # Check if the column is numeric
+				negative_mask = df[col] < 0
+				df.loc[negative_mask, col] = 0
+
+		if 'WORK_DATE' not in df.columns:
+			print("Error: 'WORK_DATE' column not found in the DataFrame.")
+			return None
+
+		# Convert 'WORK_DATE' to datetime objects.
+		# Assuming 'WORK_DATE' is in DD/MM/YYYY format. Adjust format if necessary.
+		try:
+			df['WORK_DATE'] = pd.to_datetime(df['WORK_DATE'], format='%Y-%m-%d', errors='coerce')
+		except ValueError:
+			print("Error: Could not convert 'WORK_DATE' to datetime. Please check the date format in your 'WORK_DATE' column.")
+			return None
+
+		if df['WORK_DATE'].isnull().any():
+			print("Warning: Some 'WORK_DATE' values could not be converted to datetime and will be treated as NaT. Please check date formats.")
+
+
+		# Define the start and end dates for exclusion
+		start_date = pd.to_datetime('01/01/2020', format='%d/%m/%Y')
+		end_date = pd.to_datetime('31/12/2021', format='%d/%m/%Y')
+
+		# Filter the DataFrame to exclude rows within the specified date range
+		filtered_df = df[~((df['WORK_DATE'] >= start_date) & (df['WORK_DATE'] <= end_date))]
+
+		if 'GUEST_CARRIED' not in df.columns:
+			print("Error: 'GUEST_CARRIED' column not found in the DataFrame.")
+
+		# Calculate mean and standard deviation
+		mean_guest_carried = filtered_df['GUEST_CARRIED'].mean()
+		std_guest_carried = filtered_df['GUEST_CARRIED'].std()
+
+		# Define outlier boundaries (3 standard deviations from the mean)
+		upper_bound = mean_guest_carried + 5 * std_guest_carried
+
+		# Identify outliers
+		outlier_mask = (filtered_df['GUEST_CARRIED'] > upper_bound)
+
+		# Replace outliers with the mean
+		filtered_df.loc[outlier_mask, 'GUEST_CARRIED'] = mean_guest_carried
+
+		return filtered_df
+		
 
 	def clean_weather(self):
 		self.weather['dt_iso'] = pd.to_datetime(self.weather['dt_iso'], format='%Y-%m-%d %H:%M:%S %z UTC', errors='coerce')
 		self.weather['dt_iso'] = self.weather['dt_iso'].dt.tz_convert(None)
-		columns_to_drop = ['dew_point','temp_min','temp_max','humidity', 'weather_icon','grnd_level','sea_level','visibility','dt','timezone','city_name','lat','lon','snow_1h','snow_3h','wind_deg','wind_gust','weather_id']
+		columns_to_drop = ['dew_point','rain_1h','rain_3h','temp_min','temp_max','humidity', 'weather_icon','grnd_level','sea_level','visibility','dt','timezone','city_name','lat','lon','snow_1h','snow_3h','wind_deg','wind_gust','weather_id']
 		self.weather = self.weather.drop(columns=columns_to_drop)
 		self.weather = self.weather[(self.weather['dt_iso'].dt.year.isin([2018, 2019])) | (self.weather['dt_iso'].dt.year >= 2022)]
 
@@ -189,7 +244,12 @@ class DataLoader:
 		pass
 
 	def preprocess_attendance(self):
-		"""
-		Preprocess the data.
-		"""
+		self.attendance['USAGE_DATE'] = pd.to_datetime(self.attendance['USAGE_DATE'])
+		self.attendance.drop_duplicates(inplace=True)
+		#Standardadising the attendance data beteen 0 to 1 using MinMaxScaler
+		scaler = MinMaxScaler()
+		self.attendance['attendance_normalized'] = scaler.fit_transform(self.attendance[['attendance']])
+		#changing the date of the data to falsify 2021 and 2020 data to accomodate the model
+		# Add 2 years to rows with year 2018 and 2019
+		self.attendance.loc[self.attendance['USAGE_DATE'].dt.year.isin([2018, 2019]), 'USAGE_DATE'] += pd.DateOffset(years=2)
 		pass
