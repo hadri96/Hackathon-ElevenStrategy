@@ -300,7 +300,7 @@ class DataLoader:
 		# Normalize numerical columns
 		scaler = MinMaxScaler()
 		num_cols = ['temp', 'feels_like', 'pressure', 'wind_speed', 'clouds_all']
-		self.weather[num_cols] = scaler.fit_transform(df[num_cols])
+		self.weather[num_cols] = scaler.fit_transform(self.weather[num_cols])
 
 		# Create additional time-based features
 		self.weather['hour'] = self.weather['dt_iso'].self.weather.hour
