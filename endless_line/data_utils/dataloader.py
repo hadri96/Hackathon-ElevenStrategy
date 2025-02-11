@@ -3,7 +3,7 @@ from pathlib import Path
 import git
 import pandas as pd
 import datetime
-from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import MinMaxScaler, LabelEncoder
 
 
 class DataLoader:
@@ -262,6 +262,8 @@ class DataLoader:
 		"""
 		Preprocess the data.
 		"""
+		self.preprocess_weather()
+		self.preprocess_attendance()
 		pass
 
 	def preprocess_waiting_times(self):
@@ -274,7 +276,42 @@ class DataLoader:
 		"""
 		Preprocess the data.
 		"""
-		pass
+		label_enc_main = LabelEncoder()
+		label_enc_desc = LabelEncoder()
+
+		weather_mapping = {
+			'sky is clear': 0,
+			'few clouds': 1,
+			'scattered clouds': 2,
+			'broken clouds': 3,
+			'overcast clouds': 4,
+			'light rain': 5,
+			'moderate rain': 6,
+			'heavy intensity rain': 7,
+			'light snow': 8,
+			'snow': 9
+		}
+
+		self.weather['weather_description_encoded'] = self.weather['weather_description'].map(weather_mapping)
+		self.weather['weather_main_encoded'] = label_enc_main.fit_transform(self.weather['weather_main'])
+
+		# Drop original categorical columns
+		self.weather.drop(columns=['weather_main', 'weather_description'], inplace=True)
+
+		# Normalize numerical columns
+		scaler = MinMaxScaler()
+		num_cols = ['temp', 'feels_like', 'pressure', 'wind_speed', 'clouds_all']
+		self.weather[num_cols] = scaler.fit_transform(self.weather[num_cols])
+
+		self.weather.loc[self.weather['dt_iso'].dt.year.isin([2018, 2019]), 'dt_iso'] += pd.DateOffset(years=2)
+
+		self.weather['hour'] = self.weather['dt_iso'].dt.hour
+		self.weather['day'] = self.weather['dt_iso'].dt.day
+		self.weather['month'] = self.weather['dt_iso'].dt.month
+		self.weather['day_of_week'] = self.weather['dt_iso'].dt.dayofweek
+		self.weather.loc[self.weather['dt_iso'].dt.year.isin([2018, 2019]), 'dt_iso'] += pd.DateOffset(years=2)
+
+
 
 	def preprocess_parade_night_show(self):
 		"""
@@ -297,10 +334,18 @@ class DataLoader:
 	def preprocess_attendance(self):
 		self.attendance['USAGE_DATE'] = pd.to_datetime(self.attendance['USAGE_DATE'])
 		self.attendance.drop_duplicates(inplace=True)
-		#Standardadising the attendance data beteen 0 to 1 using MinMaxScaler
-		scaler = MinMaxScaler()
-		self.attendance['attendance_normalized'] = scaler.fit_transform(self.attendance[['attendance']])
+		self.attendance.drop(columns=['FACILITY_NAME'], inplace=True)
 		#changing the date of the data to falsify 2021 and 2020 data to accomodate the model
 		# Add 2 years to rows with year 2018 and 2019
 		self.attendance.loc[self.attendance['USAGE_DATE'].dt.year.isin([2018, 2019]), 'USAGE_DATE'] += pd.DateOffset(years=2)
 	
+
+	def data_preprocessing_attendance_pred(self):
+		"""
+		Preprocess the data for the attedance prediction model.
+		"""
+		self.data_preprocessing()
+		self.weather.drop(columns=['hour'], inplace=True)
+		self.weather = self.weather[self.weather['dt_iso'].dt.hour == 12].copy()
+		self.weather['dt_iso'] = self.weather['dt_iso'].dt.date
+		pass
