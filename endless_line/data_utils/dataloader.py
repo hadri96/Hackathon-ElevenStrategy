@@ -308,8 +308,6 @@ class DataLoader:
 		self.weather['day_of_year'] = self.weather['dt_iso'].dt.dayofyear
 
 
-
-
 	def preprocess_parade_night_show(self):
 		"""
 		Preprocess the data.
@@ -336,3 +334,13 @@ class DataLoader:
 		# Add 2 years to rows with year 2018 and 2019
 		self.attendance.loc[self.attendance['USAGE_DATE'].dt.year.isin([2018, 2019]), 'USAGE_DATE'] += pd.DateOffset(years=2)
 	
+
+	def data_preprocessing_attendance_pred():
+		"""
+		Preprocess the data for the attedance prediction model.
+		"""
+		self.data_preprocessing()
+		self.weather.drop(columns=['hour'], inplace=True)
+		self.weather = self.weather[self.weather['dt_iso'].dt.hour == 12].copy()
+		self.weather['dt_iso'] = self.weather['dt_iso'].dt.date
+		pass
