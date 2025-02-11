@@ -2,6 +2,8 @@ import os
 from pathlib import Path
 import git
 import pandas as pd
+from sklearn.preprocessing import MinMaxScaler
+
 class DataLoader:
 	"""A class to handle loading data files from a specified directory.
 
@@ -23,7 +25,8 @@ class DataLoader:
 	Methods
 	-------
 		`load_file(file: str)` -> `pd.DataFrame`: Load a single file from the data directory.
-		`load_all_files()` -> `None`: Load all the files in the data directory.
+		`load_all_files()` -> `None`: Load all the files in the data directory.¨
+		`clean_data()` -> `None`: Clean the data.
 	"""
 	def __init__(self, data_dir_path: str = "data", load_all_files: bool = False):
 		"""Initializes the DataLoader.
@@ -44,6 +47,7 @@ class DataLoader:
 		self.data_dir_path = os.path.join(self.root_dir, data_dir_path)
 		if load_all_files:
 			self._load_all_files()
+		
 
 	def _find_git_root(self) -> str:
 		"""Find the root directory of the git repository.
@@ -108,7 +112,6 @@ class DataLoader:
 		self.clean_entity_schedule()
 		self.clean_link_attraction_park()
 		self.clean_attendance()
-		pass
 
 	def clean_waiting_times(self):
 		"""
@@ -139,7 +142,6 @@ class DataLoader:
 		Clean the parade and night show data.
 		"""
 		self.parade_night_show = self.parade_night_show[(self.parade_night_show['WORK_DATE'] < '2020-01-01') | (self.parade_night_show['WORK_DATE'] >= '2022-01-01')]
-		pass
 
 	def clean_entity_schedule(self):
 		"""
@@ -147,14 +149,12 @@ class DataLoader:
 		"""
 		attractions = self.link_attraction_park['ATTRACTION'].tolist()
 		self.entity_schedule = self.entity_schedule[self.entity_schedule['ENTITY_DESCRIPTION_SHORT'].isin(attractions + ['PortAventura World'])]
-		pass
 
 	def clean_link_attraction_park(self):
 		"""
 		Clean the attraction-park mapping data.
 		"""
 		self.link_attraction_park = self.link_attraction_park[self.link_attraction_park['PARK'] == 'PortAventura World']
-		pass
 
 	def clean_attendance(self):
 		"""
@@ -202,7 +202,12 @@ class DataLoader:
 		pass
 
 	def preprocess_attendance(self):
-		"""
-		Preprocess the data.
-		"""
+		self.attendance['USAGE_DATE'] = pd.to_datetime(self.attendance['USAGE_DATE'])
+		self.attendance.drop_duplicates(inplace=True)
+		#Standardadising the attendance data beteen 0 to 1 using MinMaxScaler
+		scaler = MinMaxScaler()
+		self.attendance['attendance_normalized'] = scaler.fit_transform(self.attendance[['attendance']])
+		#changing the date of the data to falsify 2021 and 2020 data to accomodate the model
+		# Add 2 years to rows with year 2018 and 2019
+		self.attendance.loc[self.attendance['USAGE_DATE'].dt.year.isin([2018, 2019]), 'USAGE_DATE'] += pd.DateOffset(years=2)
 		pass
