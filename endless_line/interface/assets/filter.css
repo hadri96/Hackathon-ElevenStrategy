@@ -37,3 +37,41 @@
 .js-plotly-plot {
 	border-radius: 4px;
 }
+
+/* Date Picker styling */
+.SingleDatePickerInput {
+	width: 100% !important;
+}
+
+.SingleDatePickerInput__withBorder {
+	border: 1px solid #ced4da !important;
+	border-radius: 4px !important;
+}
+
+.DateInput {
+	width: 100% !important;
+}
+
+.DateInput_input {
+	height: 38px !important;
+	padding: 6px 12px !important;
+	font-size: 1rem !important;
+	border-radius: 4px !important;
+}
+
+/* Dropdown styling */
+.Select-control {
+	height: 38px !important;
+	border-radius: 4px !important;
+}
+
+/* Label styling */
+.fw-bold {
+	font-size: 0.9rem;
+	color: #495057;
+}
+
+/* Input wrapper spacing */
+.h-100 {
+	padding: 0 15px;
+}
