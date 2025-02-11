@@ -113,6 +113,7 @@ class DataLoader:
 		self.clean_link_attraction_park() # pushed it to front. Given how we remove tivoli gardens data, it's better to put that here
 		self.clean_waiting_times()
 		self.clean_weather()
+		self.clean_parade_night_show_attendance()
 		self.clean_parade_night_show()
 		self.clean_entity_schedule()
 		self.clean_attendance()
@@ -194,9 +195,18 @@ class DataLoader:
 			(self.weather['dt_iso'].dt.year.isin([2018, 2019])) | (self.weather['dt_iso'].dt.year >= 2022)
 		]
 
+	def clean_parade_night_show_attendance(self):
+		"""
+		Clean the parade and night show data for attendance prediction.
+		"""
+		self.parade_night_show_attendance = self.parade_night_show[(self.parade_night_show['WORK_DATE'] < '2020-01-01') | (self.parade_night_show['WORK_DATE'] >= '2022-01-01')]
+		self.parade_night_show_attendance["Num_parade"] = 3 - self.parade_night_show_attendance[["NIGHT_SHOW",	"PARADE_1",	"PARADE_2"]].isna().sum(axis=1)
+		self.parade_night_show_attendance = self.parade_night_show_attendance[["WORK_DATE", "Num_parade"]]
+		
+
 	def clean_parade_night_show(self):
 		"""
-		Clean the parade and night show data.
+		Clean the parade and night show data for waiting time prediction.
 		"""
 		self.parade_night_show = self.parade_night_show[(self.parade_night_show['WORK_DATE'] < '2020-01-01') | (self.parade_night_show['WORK_DATE'] >= '2022-01-01')]
 		
@@ -211,24 +221,30 @@ class DataLoader:
 		parade_night_show_ = parade_night_show_.dropna(subset=['show_or_parade'])
 
 		# create 15min granularity (to join with other tables) on separate dataframes
-		# Careful: depending on how we join this with other table, it might mean that the parade is 30min or 45min long !!!!!
+		# Careful: here the behaviour with round and non-round times is not the same
 		parade_night_show_15 = parade_night_show_.copy()
 		parade_night_show_30 = parade_night_show_.copy()
+		# intermediary step: a parade is 30min, so depending on whether the minute of start is round or not, we need to create a 30min or a 45min time span 
+		round_times = [00, 15, 30, 45]
+		parade_night_show_30 = parade_night_show_30[parade_night_show_30['show_or_parade'].apply(lambda t: t.minute not in round_times)]
+		# adding 15 and 30 min deltas
 		time_change_15 = datetime.timedelta(minutes=15)
 		time_change_30 = datetime.timedelta(minutes=30)
 		parade_night_show_15['show_or_parade'] = parade_night_show_15['show_or_parade'].apply(lambda t: (datetime.datetime.combine(datetime.date.today(),t) + time_change_15).time())
 		parade_night_show_30['show_or_parade'] = parade_night_show_30['show_or_parade'].apply(lambda t: (datetime.datetime.combine(datetime.date.today(),t) + time_change_30).time())
 		
 		# concat all the granular df into one
-		parade_night_show_granular = pd.concat([parade_night_show_, parade_night_show_15, parade_night_show_30])
+		parade_night_show_ = pd.concat([parade_night_show_, parade_night_show_15, parade_night_show_30])
 
-		# to merge this with time schedules, we need full datetimes (date + hour)
-		parade_night_show_granular_ = parade_night_show_granular.copy()
-		parade_night_show_granular_['show_or_parade'] = parade_night_show_granular_.apply(lambda row: pd.to_datetime(f"{row['WORK_DATE'].date()} {row['show_or_parade']}"), axis=1).astype('datetime64[s]')
+		# to merge this with waiting times, we need full datetimes (date + hour)
+		parade_night_show_['show_or_parade'] = parade_night_show_.apply(lambda row: pd.to_datetime(f"{row['WORK_DATE'].date()} {row['show_or_parade']}"), axis=1).astype('datetime64[s]')
 
-		parade_night_show_granular_['WORK_DATE'] = parade_night_show_granular_['WORK_DATE'].astype('datetime64[s]')
+		# round down the minutes (to match with DEB_TIME in waiting times table)
+		parade_night_show_['show_or_parade'] = parade_night_show_['show_or_parade'].apply(lambda dt: self.round_to_quarter(dt, down=True))
 
-		self.parade_night_show = parade_night_show_granular_.copy()
+		parade_night_show_['WORK_DATE'] = parade_night_show_['WORK_DATE'].astype('datetime64[s]')
+
+		self.parade_night_show = parade_night_show_.copy()
 
 	def clean_entity_schedule(self):
 		"""
@@ -236,12 +252,24 @@ class DataLoader:
 		"""
 		attractions = self.link_attraction_park['ATTRACTION'].tolist()
 		self.entity_schedule = self.entity_schedule[self.entity_schedule['ENTITY_DESCRIPTION_SHORT'].isin(attractions + ['PortAventura World'])]
+
+		self.entity_schedule = self.entity_schedule[(self.entity_schedule['WORK_DATE'] < '2020-01-01') | (self.entity_schedule['WORK_DATE'] >= '2022-01-01')]
 		
 		# modify date types
 		self.entity_schedule["DEB_TIME"] = self.entity_schedule["DEB_TIME"].astype("datetime64[s]")
 		self.entity_schedule["FIN_TIME"] = self.entity_schedule["FIN_TIME"].astype("datetime64[s]")
 		self.entity_schedule["UPDATE_TIME"] = self.entity_schedule["UPDATE_TIME"].astype("datetime64[s]")
 		self.entity_schedule["WORK_DATE"] = self.entity_schedule["WORK_DATE"].astype("datetime64[s]")
+
+		# entity_schedule (to clean waiting time)
+		self.entity_schedule['IS_OPEN'] = self.entity_schedule['REF_CLOSING_DESCRIPTION'].isnull().astype(int)
+		self.entity_schedule = self.entity_schedule[['WORK_DATE', 'ENTITY_DESCRIPTION_SHORT', 'IS_OPEN']]
+
+		# entity_schedule
+		self.entity_schedule_pivot = pd.pivot_table(self.entity_schedule, values='IS_OPEN', index=['WORK_DATE'], columns=['ENTITY_DESCRIPTION_SHORT'])
+		self.entity_schedule_pivot = self.entity_schedule_pivot.reset_index()
+		self.entity_schedule_pivot = self.entity_schedule_pivot.drop(columns='Vertical Drop')
+		self.entity_schedule_pivot = self.entity_schedule_pivot.bfill()
 
 
 	def clean_link_attraction_park(self):
@@ -348,6 +376,21 @@ class DataLoader:
 		#changing the date of the data to falsify 2021 and 2020 data to accomodate the model
 		# Add 2 years to rows with year 2018 and 2019
 		self.attendance.loc[self.attendance['USAGE_DATE'].dt.year.isin([2018, 2019]), 'USAGE_DATE'] += pd.DateOffset(years=2)
+
+	def round_to_quarter(self, dt, down=True):
+		"""
+			Takes datetime64 as input (e.g. 9:10).
+			Rounds in down to the lower round time (e.g. 9:00).
+			Returns a datetime64
+		"""
+		minutes = dt.hour * 60 + dt.minute  # Convert time to total minutes
+		minutes += 0 if down else 14  # rounding down => nothing to do / rounding up => add 14min
+		rounded_minutes = (minutes // 15) * 15  # Round down to nearest quarter
+		if down:
+			rounded_minutes = max(rounded_minutes, 15) # avoid going below midnight
+		else:
+			rounded_minutes = min(rounded_minutes, 23 * 60 + 45)  # avoid going above midnight
+		return dt.replace(hour=rounded_minutes // 60, minute=rounded_minutes % 60)  # Convert back to time
 	
 
 	def data_preprocessing_attendance_pred(self):
