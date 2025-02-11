@@ -1,5 +1,7 @@
 @import url('/assets/navbar.css');
 @import url('/assets/filter.css');
+@import url('/assets/home.css');
+@import url('/assets/background.css');
 
 .hover-shadow {
 	transition: all 0.3s ease;

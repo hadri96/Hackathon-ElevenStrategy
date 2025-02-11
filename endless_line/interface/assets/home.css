@@ -1,0 +1,234 @@
+/* Card base styles */
+.card-animated {
+	position: relative;
+	overflow: hidden;
+	background: rgba(255, 255, 255, 0.95);
+	transition: all 0.3s ease;
+}
+
+/* Floating animation */
+.floating {
+	animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+	0%, 100% { transform: translateY(0); }
+	50% { transform: translateY(-7px); }
+}
+
+/* Background animation */
+.animated-background {
+	position: absolute;
+	top: -50%;
+	left: -50%;
+	right: -50%;
+	bottom: -50%;
+	background: linear-gradient(
+		45deg,
+		rgba(13, 110, 253, 0.1) 25%,
+		rgba(255, 255, 255, 0.1) 25%,
+		rgba(255, 255, 255, 0.1) 50%,
+		rgba(13, 110, 253, 0.1) 50%,
+		rgba(13, 110, 253, 0.1) 75%,
+		rgba(255, 255, 255, 0.1) 75%
+	);
+	background-size: 100px 100px;
+	animation: moveBackground 10s linear infinite;
+	z-index: 0;
+}
+
+@keyframes moveBackground {
+	0% { transform: rotate(0deg); }
+	100% { transform: rotate(360deg); }
+}
+
+/* Content positioning */
+.card-content {
+	position: relative;
+	z-index: 1;
+}
+
+/* Hover effects */
+.card-animated:hover {
+	transform: translateY(-5px);
+	box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.card-animated:hover .animated-background {
+	animation-duration: 5s;
+}
+
+/* Button hover effect */
+.hover-grow {
+	transition: all 0.2s ease;
+}
+
+.hover-grow:hover {
+	transform: scale(1.05);
+}
+
+/* Title glow effect */
+.glow-text {
+	animation: glow 4s ease-in-out infinite;
+}
+
+@keyframes glow {
+	0%, 100% { text-shadow: 0 0 5px rgba(13, 110, 253, 0.1); }
+	50% { text-shadow: 0 0 20px rgba(13, 110, 253, 0.3); }
+}
+
+/* Fade in animation */
+.fade-in {
+	animation: fadeIn 1.5s ease-out;
+}
+
+@keyframes fadeIn {
+	from {
+		opacity: 0;
+		transform: translateY(20px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+/* Smooth transitions for all elements */
+* {
+	transition: all 0.3s ease;
+}
+
+/* Card positioning context */
+.card {
+	position: relative;
+	background: rgba(255, 255, 255, 0.9);
+	backdrop-filter: blur(5px);
+}
+
+/* Floating animation */
+.floating-card:hover .animated-background {
+	animation-duration: 2s;
+	opacity: 0.8;
+}
+
+/* Background pattern */
+.background-pattern {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background:
+		radial-gradient(circle at 20% 20%, rgba(13, 110, 253, 0.03) 0%, transparent 50%),
+		radial-gradient(circle at 80% 80%, rgba(13, 110, 253, 0.03) 0%, transparent 50%);
+	animation: patternMove 15s ease infinite;
+	z-index: -1;
+	opacity: 0.7;
+}
+
+@keyframes patternMove {
+	0%, 100% {
+		background-position: 0% 0%, 100% 100%;
+	}
+	50% {
+		background-position: 100% 0%, 0% 100%;
+	}
+}
+
+/* Main container background */
+.home-container {
+	min-height: 100vh;
+	background: radial-gradient(#f8f9fa, #e9ecef);
+	overflow: hidden;
+	position: relative;
+}
+
+/* Floating lights */
+.light {
+	position: absolute;
+	width: 6px;
+	height: 6px;
+	background-color: rgba(13, 110, 253, 0.15);
+	box-shadow: 0 0 20px 2px rgba(13, 110, 253, 0.1);
+	opacity: 0;
+	top: 100vh;
+	border-radius: 50%;
+}
+
+/* Light animations with different speeds and scales */
+.x1 {
+	animation: floatUp 4s infinite linear;
+	transform: scale(1.0);
+}
+
+.x2 {
+	animation: floatUp 7s infinite linear;
+	transform: scale(1.6);
+	left: 15%;
+}
+
+.x3 {
+	animation: floatUp 2.5s infinite linear;
+	transform: scale(0.5);
+	left: -15%;
+}
+
+.x4 {
+	animation: floatUp 4.5s infinite linear;
+	transform: scale(1.2);
+	left: -34%;
+}
+
+.x5 {
+	animation: floatUp 8s infinite linear;
+	transform: scale(2.2);
+	left: -57%;
+}
+
+.x6 {
+	animation: floatUp 3s infinite linear;
+	transform: scale(0.8);
+	left: 37%;
+}
+
+.x7 {
+	animation: floatUp 5.3s infinite linear;
+	transform: scale(1.7);
+	left: 62%;
+}
+
+/* Floating animation */
+@keyframes floatUp {
+	0% {
+		top: 100vh;
+		opacity: 0;
+	}
+	25% {
+		opacity: 1;
+	}
+	50% {
+		opacity: .8;
+	}
+	75% {
+		opacity: 1;
+	}
+	100% {
+		top: -100vh;
+		opacity: 0;
+	}
+}
+
+/* Card styles */
+.card-clean {
+	background: rgba(255, 255, 255, 0.9);
+	backdrop-filter: blur(10px);
+	border: 1px solid rgba(255, 255, 255, 0.2);
+	transition: all 0.3s ease;
+}
+
+.card-clean:hover {
+	transform: translateY(-5px);
+	box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+/* Rest of your existing CSS... */

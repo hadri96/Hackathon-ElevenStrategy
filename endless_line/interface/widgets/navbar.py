@@ -19,13 +19,6 @@ def create_navbar():
         ),
         dbc.NavItem(
             dbc.NavLink(
-                "About",
-                href="/about",
-                className="nav-link-custom"
-            )
-        ),
-        dbc.NavItem(
-            dbc.NavLink(
                 "Dashboard",
                 href="/dashboard",
                 className="nav-link-custom"
@@ -35,6 +28,13 @@ def create_navbar():
             dbc.NavLink(
                 "When Should I Go?",
                 href="/when",
+                className="nav-link-custom"
+            )
+        ),
+        dbc.NavItem(
+            dbc.NavLink(
+                "About",
+                href="/about",
                 className="nav-link-custom"
             )
         ),
@@ -49,7 +49,7 @@ def create_navbar():
                     dbc.Row(
                         [
                             dbc.Col(html.I(className="fas fa-chart-line me-2")),  # Font Awesome icon
-                            dbc.Col(dbc.NavbarBrand("Endless Line Dashboard", className="ms-2")),
+                            dbc.Col(dbc.NavbarBrand("The Endless Line", className="ms-2")),
                         ],
                         align="center",
                         className="g-0",
