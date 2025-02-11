@@ -3,7 +3,7 @@ from pathlib import Path
 import git
 import pandas as pd
 import datetime
-from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import MinMaxScaler, LabelEncoder
 
 
 class DataLoader:
