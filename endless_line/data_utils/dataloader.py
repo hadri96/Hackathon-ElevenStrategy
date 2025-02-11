@@ -331,9 +331,7 @@ class DataLoader:
 	def preprocess_attendance(self):
 		self.attendance['USAGE_DATE'] = pd.to_datetime(self.attendance['USAGE_DATE'])
 		self.attendance.drop_duplicates(inplace=True)
-		#Standardadising the attendance data beteen 0 to 1 using MinMaxScaler
-		scaler = MinMaxScaler()
-		self.attendance['attendance_normalized'] = scaler.fit_transform(self.attendance[['attendance']])
+		self.attendance.drop(columns=['FACILITY_NAME'], inplace=True)
 		#changing the date of the data to falsify 2021 and 2020 data to accomodate the model
 		# Add 2 years to rows with year 2018 and 2019
 		self.attendance.loc[self.attendance['USAGE_DATE'].dt.year.isin([2018, 2019]), 'USAGE_DATE'] += pd.DateOffset(years=2)
