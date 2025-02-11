@@ -174,4 +174,4 @@ cython_debug/
 data/*.csv
 data/*.xlsx
 *.DS_Store
-
+.secret
