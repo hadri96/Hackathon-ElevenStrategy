@@ -1,8 +1,8 @@
-from dash import html
+from dash import html, dcc
 import dash_bootstrap_components as dbc
 
 def create_feature_card(title, description, icon, link):
-    """Create a feature card with consistent styling"""
+    """Create a feature card with hover effect only"""
     return dbc.Card([
         dbc.CardBody([
             html.Div([
@@ -16,80 +16,84 @@ def create_feature_card(title, description, icon, link):
                     ],
                     href=link,
                     color="primary",
-                    className="mt-3"
+                    className="mt-3 hover-grow"
                 )
             ], className="text-center")
         ], className="p-4")
-    ], className="h-100 shadow-sm hover-shadow")
+    ], className="h-100 shadow-sm card-clean")  # Removed floating class
 
-layout = dbc.Container([
-    # Hero Section
-    dbc.Row([
-        dbc.Col([
-            html.H1("Welcome to The Endless Line", className="display-4 text-center mb-3"),
-            html.P(
-                "Your AI-powered companion for the perfect theme park experience",
-                className="lead text-center text-muted mb-5"
-            ),
-        ], width=12)
-    ], className="py-5"),
+layout = html.Div([
+    # Background pattern container
+    html.Div(className="background-container"),
 
-    # Feature Cards
-    dbc.Row([
-        # Dashboard Card
-        dbc.Col([
-            create_feature_card(
-                "Interactive Dashboard",
-                "Check our dashboard to see how the next days might look like at the park! We show our predictions for real-time wait times, weather conditions, and crowd levels. Make informed decisions about which attractions to visit next.",
-                "fa-chart-line",
-                "/dashboard"
-            )
-        ], width=12, md=4, className="mb-4"),
+    dbc.Container([
+        # Hero Section - removed any extra spacing
+        dbc.Row([
+            dbc.Col([
+                html.Div([
+                    html.H1(
+                        "Welcome to The Endless Line",
+                        className="display-4 text-center mb-3 glow-text"
+                    ),
+                    html.P(
+                        "Your AI-powered companion for the perfect theme park experience",
+                        className="lead text-center mb-5 fade-in"
+                    ),
+                ], className="py-4")  # Reduced padding
+            ], width=12)
+        ], className="g-0"),  # Remove gutter
 
-        # When Should I Go Card
-        dbc.Col([
-            create_feature_card(
-                "When Should I Go?",
-                "Plan your perfect visit with our AI recommendations. Get personalized suggestions for the best days and times to visit based on your preferences.",
-                "fa-calendar-check",
-                "/when"
-            )
-        ], width=12, md=4, className="mb-4"),
+        # Animated background lights
+        html.Div(className="light x1"),
+        html.Div(className="light x2"),
+        html.Div(className="light x3"),
+        html.Div(className="light x4"),
+        html.Div(className="light x5"),
+        html.Div(className="light x6"),
+        html.Div(className="light x7"),
 
-        # About Card
-        dbc.Col([
-            create_feature_card(
-                "About Our Project",
-                "Discover how we use machine learning and data analytics to predict wait times and enhance your theme park experience.",
-                "fa-lightbulb",
-                "/about"
-            )
-        ], width=12, md=4, className="mb-4")
-    ], className="g-4"),
+        # Feature Cards
+        dbc.Row([
+            dbc.Col([
+                create_feature_card(
+                    "Interactive Dashboard",
+                    "Monitor real-time wait times, weather conditions, and crowd levels. Make informed decisions about which attractions to visit next.",
+                    "fa-chart-line",
+                    "/dashboard"
+                )
+            ], width=12, md=4, className="mb-4"),
 
-    # Additional Info Section
-    dbc.Row([
-        dbc.Col([
-            html.Hr(className="my-5"),
-            html.P([
-                "The Endless Line combines real-time data with advanced analytics to help you ",
-                html.Strong("maximize your enjoyment"),
-                " and ",
-                html.Strong("minimize your wait times"),
-                "."
-            ], className="text-center text-muted")
-        ], width=12)
-    ])
-], fluid=True, className="py-4")
+            dbc.Col([
+                create_feature_card(
+                    "When Should I Go?",
+                    "Plan your perfect visit with our AI recommendations. Get personalized suggestions for the best days and times to visit based on historical data.",
+                    "fa-calendar-check",
+                    "/when-to-go"
+                )
+            ], width=12, md=4, className="mb-4"),
 
-# CSS remains the same
-"""
-.hover-shadow {
-    transition: all 0.3s ease;
-}
+            dbc.Col([
+                create_feature_card(
+                    "About Our Project",
+                    "Discover how we use machine learning and data analytics to predict wait times and enhance your theme park experience.",
+                    "fa-lightbulb",
+                    "/about"
+                )
+            ], width=12, md=4, className="mb-4")
+        ], className="g-4"),
 
-.hover-shadow:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
-}
-"""
+        # Footer section
+        dbc.Row([
+            dbc.Col([
+                html.Hr(className="my-5"),
+                html.P([
+                    "The Endless Line combines real-time data with advanced analytics to help you ",
+                    html.Strong("maximize your enjoyment"),
+                    " and ",
+                    html.Strong("minimize your wait times"),
+                    "."
+                ], className="text-center text-muted fade-in")
+            ], width=12)
+        ])
+    ], fluid=True, className="p-0")  # Remove container padding
+], className="home-container")

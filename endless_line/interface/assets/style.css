@@ -1,5 +1,28 @@
+/* Import Poppins font */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+/* Import other CSS files */
 @import url('/assets/navbar.css');
 @import url('/assets/filter.css');
+@import url('/assets/home.css');
+@import url('/assets/background.css');
+
+/* Apply font globally */
+body {
+	font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+/* Adjust headings */
+h1, h2, h3, h4, h5, h6 {
+	font-family: 'Poppins', sans-serif;
+	font-weight: 600;
+}
+
+/* Adjust paragraph text */
+p {
+	font-family: 'Poppins', sans-serif;
+	font-weight: 400;
+}
 
 .hover-shadow {
 	transition: all 0.3s ease;
@@ -8,4 +31,22 @@
 .hover-shadow:hover {
 	transform: translateY(-5px);
 	box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Make page content background transparent */
+#page-content {
+    background: transparent !important;
+    position: relative;
+    z-index: 1;  /* Lower than navbar but higher than background */
+}
+
+/* Ensure navbar stays on top */
+.navbar {
+    position: relative;
+    z-index: 3;  /* Higher than page-content */
+}
+
+/* Background should be at the bottom layer */
+.background-container {
+    z-index: 1;  /* Lowest z-index */
 }
