@@ -335,7 +335,7 @@ class DataLoader:
 		self.attendance.loc[self.attendance['USAGE_DATE'].dt.year.isin([2018, 2019]), 'USAGE_DATE'] += pd.DateOffset(years=2)
 	
 
-	def data_preprocessing_attendance_pred():
+	def data_preprocessing_attendance_pred(self):
 		"""
 		Preprocess the data for the attedance prediction model.
 		"""
