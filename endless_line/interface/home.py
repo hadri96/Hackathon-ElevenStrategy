@@ -2,7 +2,7 @@ from dash import html, dcc
 import dash_bootstrap_components as dbc
 
 def create_feature_card(title, description, icon, link):
-    """Create a feature card with hover effect only"""
+    """Create a feature card with hover effect"""
     return dbc.Card([
         dbc.CardBody([
             html.Div([
@@ -20,7 +20,7 @@ def create_feature_card(title, description, icon, link):
                 )
             ], className="text-center")
         ], className="p-4")
-    ], className="h-100 shadow-sm card-clean")  # Removed floating class
+    ], className="h-100 card-animated shadow-sm")  # Simplified class names
 
 layout = html.Div([
     # Background pattern container
