@@ -21,7 +21,7 @@ def create_attendance_widget(attendance_value=None):
         dbc.CardBody([
             # Attendance number with separator
             html.H3(
-                f"{attendance_value:,}",
+                f"{attendance_value: }",
                 className="mb-0 text-primary"
             ),
         ], className="p-3")

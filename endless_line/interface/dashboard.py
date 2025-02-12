@@ -12,7 +12,11 @@ import plotly.express as px
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
 import pandas as pd
+from endless_line.data_utils.weather_forecast import WeatherForecast
+import json
 from endless_line.data_utils.dashboard_utils import DashboardUtils
+from attendance_prediction_model.attendance_pred import attendance_forecasting
+
 
 # Import your app instance from app.py
 from endless_line.interface.app import app
@@ -125,6 +129,7 @@ def update_dashboard(n_clicks, selected_date, selected_hour, closed_attractions,
         df_wait = df_wait[~df_wait["attraction"].isin(closed_attractions)]
 
     if selected_hour is None:
+        selected_hour = datetime.datetime.now().hour+1  # Default to actual hour +1
         if is_scrollable:
             # Create a subplot for each attraction
             open_attractions = [attr for attr in ALL_ATTRACTIONS if attr not in (closed_attractions or [])]
@@ -242,17 +247,18 @@ def update_dashboard(n_clicks, selected_date, selected_hour, closed_attractions,
 
     # Create attendance widget and weather card
     attendance = 25000  # Replace with actual attendance data
+    out = attendance_forecasting()
+    attendance = DashboardUtils().get_attendance(out, selected_date)
+
     attendance_widget = create_attendance_widget(attendance)
-    row = {
-        "dt_txt": "2025-02-10 18:00:00",
-        "temp": 5.59,
-        "feels_like": 3.96,
-        "weather_main": "Rain",
-        "weather_description": "moderate rain",
-        "weather_icon": "10n",
-        "humidity": 75,
-        "wind_speed": 3.5
-    }
+
+    weather_forecast = WeatherForecast().get_forecast(selected_date, selected_hour)
+    if not weather_forecast.empty:
+        weather_forecast['dt_iso'] = weather_forecast['dt_iso'].dt.strftime('%Y-%m-%d %H:%M:%S')
+        row = json.dumps(weather_forecast.iloc[0].to_dict())
+        row = json.loads(row)
+    else:
+        raise ValueError(f"No weather forecast data available at: {selected_date} {selected_hour}")
     weather_str = create_weather_card(row)  # Assuming row is defined somewhere
 
     return attendance_widget, weather_str, fig_main, fig_stats

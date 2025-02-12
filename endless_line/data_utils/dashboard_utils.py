@@ -1,10 +1,6 @@
 from endless_line.data_utils.dataloader import DataLoader
-import boto3
-from botocore.config import Config
-from botocore.exceptions import ClientError
-from dotenv import load_dotenv
-import os
 from endless_line.data_utils.dataloader import DataLoader
+from datetime import datetime
 
 class DashboardUtils:
     """
@@ -23,3 +19,7 @@ class DashboardUtils:
         self.data.link_attraction_park = self.data.load_file('link_attraction_park.csv')
         self.data.clean_link_attraction_park()
         return list(self.data.link_attraction_park.ATTRACTION.unique())
+
+    def get_attendance(self, df, date: datetime.date):
+        output = df[df['ds'].dt.date.astype(str) == date]['yhat'].values[0]
+        return int(str(int(output)).replace(',', ' '))
