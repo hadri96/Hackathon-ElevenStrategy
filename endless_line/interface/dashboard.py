@@ -138,11 +138,12 @@ def update_dashboard(n_clicks, selected_date, selected_hour, closed_attractions,
             open_attractions = [attr for attr in ALL_ATTRACTIONS if attr not in (closed_attractions or [])]
             n_attractions = len(open_attractions)
 
+            vertical_spacing = min(0.01, 1.0 / (n_attractions + 1))
             fig_main = make_subplots(
                 rows=n_attractions,
                 cols=1,
                 subplot_titles=open_attractions,
-                vertical_spacing=0.08  # Increased spacing between subplots
+                vertical_spacing=vertical_spacing  # Increased spacing between subplots
             )
 
             for idx, attraction in enumerate(open_attractions, 1):
@@ -160,11 +161,20 @@ def update_dashboard(n_clicks, selected_date, selected_hour, closed_attractions,
                     col=1
                 )
 
+                # Update y-axis for each subplot
                 fig_main.update_yaxes(
                     title_text="Wait Time (min)",
                     row=idx,
                     col=1,
                     range=[0, df_wait["wait_time"].max() * 1.1]
+                )
+
+                # Update x-axis for each subplot
+                fig_main.update_xaxes(
+                    title_text="Hour of Day" if idx == n_attractions else "",  # Only show title on bottom plot
+                    row=idx,
+                    col=1,
+                    rangeslider=dict(visible=False)  # Remove rangeslider
                 )
 
             fig_main.update_layout(
@@ -180,14 +190,6 @@ def update_dashboard(n_clicks, selected_date, selected_hour, closed_attractions,
                 ),
                 paper_bgcolor='white',
                 plot_bgcolor='white'
-            )
-
-            # Set common x-axis title only for the bottom plot
-            fig_main.update_xaxes(
-                title_text="Hour of Day",
-                row=n_attractions,
-                col=1,
-                rangeslider=dict(visible=True)
             )
 
         else:
