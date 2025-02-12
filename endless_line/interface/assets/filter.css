@@ -1,0 +1,77 @@
+/* Dashboard styling */
+.card {
+	border-radius: 8px;
+	border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+	background-color: #f8f9fa;
+	border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+	padding: 1rem;
+}
+
+.card-body {
+	padding: 1.5rem;
+}
+
+/* Filter section styling */
+.Select-control {
+	border-radius: 4px !important;
+}
+
+.DateInput_input {
+	border-radius: 4px !important;
+}
+
+/* Button styling */
+.btn-primary {
+	transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+	transform: translateY(-1px);
+	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Graph container styling */
+.js-plotly-plot {
+	border-radius: 4px;
+}
+
+/* Date Picker styling */
+.SingleDatePickerInput {
+	width: 100% !important;
+}
+
+.SingleDatePickerInput__withBorder {
+	border: 1px solid #ced4da !important;
+	border-radius: 4px !important;
+}
+
+.DateInput {
+	width: 100% !important;
+}
+
+.DateInput_input {
+	height: 38px !important;
+	padding: 6px 12px !important;
+	font-size: 1rem !important;
+	border-radius: 4px !important;
+}
+
+/* Dropdown styling */
+.Select-control {
+	height: 38px !important;
+	border-radius: 4px !important;
+}
+
+/* Label styling */
+.fw-bold {
+	font-size: 0.9rem;
+	color: #495057;
+}
+
+/* Input wrapper spacing */
+.h-100 {
+	padding: 0 15px;
+}
