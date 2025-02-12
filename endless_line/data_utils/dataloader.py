@@ -183,6 +183,7 @@ class DataLoader:
 
 		# filter attractions to only keep port aventura world
 		attractions = self.link_attraction_park['ATTRACTION'].tolist()
+		attractions.remove('Vertical Drop')
 		filtered_df = filtered_df[filtered_df['ENTITY_DESCRIPTION_SHORT'].isin(attractions + ['PortAventura World'])]
 
 		self.waiting_times = filtered_df
@@ -260,6 +261,7 @@ class DataLoader:
 		Clean the entity schedule data.
 		"""
 		attractions = self.link_attraction_park['ATTRACTION'].tolist()
+		attractions.remove('Vertical Drop')
 		self.entity_schedule = self.entity_schedule[self.entity_schedule['ENTITY_DESCRIPTION_SHORT'].isin(attractions)] # + ['PortAventura World']
 
 		self.entity_schedule = self.entity_schedule[(self.entity_schedule['WORK_DATE'] < '2020-01-01') | (self.entity_schedule['WORK_DATE'] >= '2022-01-01')]
@@ -280,7 +282,7 @@ class DataLoader:
 		self.entity_schedule_pivot = self.entity_schedule_pivot.reset_index()
 		
 		# dealing with NaN values
-		self.entity_schedule_pivot = self.entity_schedule_pivot.drop(columns='Vertical Drop')
+		#self.entity_schedule_pivot = self.entity_schedule_pivot.drop(columns='Vertical Drop')
 		self.entity_schedule_pivot = self.entity_schedule_pivot.bfill()
 
 
@@ -442,7 +444,7 @@ class DataLoader:
 		self.merge_parade_night_show_attendance()
 		self.merge_entity_schedule_pivot()
 		self.merge_entity_schedule()
-
+		
 	def merge_parade_night_show(self):
 		"""
 			merge waiting_times with parade_night_show
@@ -463,12 +465,14 @@ class DataLoader:
 			merge waiting_times with entity_schedule_pivot
 		"""
 		self.merged = self.merged.merge(self.entity_schedule_pivot, left_on='WORK_DATE', right_on='WORK_DATE', how='left')
+		self.merged = self.merged.sort_values('DEB_TIME').bfill()
 
 	def merge_entity_schedule(self):
 		"""
 			merge waiting_times with entity_schedule
 		"""
 		self.merged = self.merged.merge(self.entity_schedule, left_on=['WORK_DATE', 'ENTITY_DESCRIPTION_SHORT'], right_on=['WORK_DATE', 'ENTITY_DESCRIPTION_SHORT'], how='left')
+		self.merged = self.merged.sort_values('DEB_TIME').bfill()
 
 	def round_to_quarter(self, dt, down=True):
 		"""
