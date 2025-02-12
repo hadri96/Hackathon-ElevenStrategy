@@ -484,6 +484,7 @@ class DataLoader:
 		self.merge_entity_schedule_pivot()
 		self.merge_entity_schedule()
 		self.merge_weather()
+		self.merge_attendance()
 		
 	def merge_parade_night_show(self):
 		"""
@@ -526,6 +527,12 @@ class DataLoader:
 
 		self.merged.drop(columns=["dt_iso", "DEB_TIME_2"], inplace=True)
 		self.merged = self.merged.sort_values('DEB_TIME').bfill()
+
+	def merge_attendance(self):
+		"""
+			merge waiting_times with attendance
+		"""
+		self.merged = self.merged.merge(self.attendance, left_on='WORK_DATE', right_on='USAGE_DATE', how='left').drop(columns='USAGE_DATE')
 
 	def round_to_quarter(self, dt, down=True):
 		"""

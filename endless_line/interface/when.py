@@ -37,7 +37,7 @@ layout = dbc.Container([
         # Filters Column
         dbc.Col([
             create_when_to_go_filters(ALL_ATTRACTIONS)
-        ],style={'width':'35%'}, md=4),
+        ],style={'width':'45%'}, md=4),
 
         # Results Column (placeholder for now)
         dbc.Col([
