@@ -12,7 +12,7 @@ import plotly.express as px
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
 import pandas as pd
-
+from endless_line.data_utils.dashboard_utils import DashboardUtils
 
 # Import your app instance from app.py
 from endless_line.interface.app import app
@@ -20,6 +20,7 @@ from endless_line.interface.app import app
 ########################################
 # Mock Data & Utility Functions
 ########################################
+
 
 ALL_ATTRACTIONS = [
     "Roller Coaster",
