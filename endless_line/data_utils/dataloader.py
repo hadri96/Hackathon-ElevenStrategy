@@ -450,7 +450,6 @@ class DataLoader:
 		"""
 		Preprocess the data for the attedance prediction model.
 		"""
-		self.data_preprocessing()	# calling this function here might cause exceptions (e.g. key error if preprocessing tries to drop already dropped columns)
 		self.weather.drop(columns=['hour'], inplace=True)
 		self.weather = self.weather[self.weather['dt_iso'].dt.hour == 12].copy()
 		self.weather['dt_iso'] = self.weather['dt_iso'].dt.date
