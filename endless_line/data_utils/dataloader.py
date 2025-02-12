@@ -30,7 +30,7 @@ class DataLoader:
 		`load_all_files()` -> `None`: Load all the files in the data directory.¨
 		`clean_data()` -> `None`: Clean the data.
 	"""
-	def __init__(self, data_dir_path: str = "data", load_all_files: bool = False):
+	def __init__(self, data_dir_path: str = "data", load_all_files: bool = False, clean_data: bool = False):
 		"""Initializes the DataLoader.
 
 	Args:
@@ -49,7 +49,9 @@ class DataLoader:
 		self.data_dir_path = os.path.join(self.root_dir, data_dir_path)
 		if load_all_files:
 			self._load_all_files()
-		
+		if clean_data:
+			self.clean_data()
+
 
 	def _find_git_root(self) -> str:
 		"""Find the root directory of the git repository.
@@ -184,8 +186,8 @@ class DataLoader:
 		self.weather['dt_iso'] = self.weather['dt_iso'].dt.tz_localize(None)
 
 		columns_to_drop = [
-			'dew_point', 'temp_min', 'temp_max', 'humidity', 'weather_icon', 'rain_1h', 
-			'rain_3h', 'grnd_level', 'sea_level', 'visibility', 'dt', 'timezone', 
+			'dew_point', 'temp_min', 'temp_max', 'humidity', 'weather_icon', 'rain_1h',
+			'rain_3h', 'grnd_level', 'sea_level', 'visibility', 'dt', 'timezone',
 			'city_name', 'lat', 'lon', 'snow_1h', 'snow_3h', 'wind_deg', 'wind_gust', 'weather_id'
 		]
 
@@ -199,14 +201,14 @@ class DataLoader:
 		Clean the parade and night show data.
 		"""
 		self.parade_night_show = self.parade_night_show[(self.parade_night_show['WORK_DATE'] < '2020-01-01') | (self.parade_night_show['WORK_DATE'] >= '2022-01-01')]
-		
+
 		# create 3 separate df for each parade type, in order to concat everything
 		parade_night_show_night_show = self.parade_night_show[["WORK_DATE", "NIGHT_SHOW"]].rename(columns={"NIGHT_SHOW": 'show_or_parade'})
 		parade_night_show_parade_1 = self.parade_night_show[["WORK_DATE", "PARADE_1"]].rename(columns={"PARADE_1": 'show_or_parade'})
 		parade_night_show_parade_2 = self.parade_night_show[["WORK_DATE", "PARADE_2"]].rename(columns={"PARADE_2": 'show_or_parade'})
 
 		parade_night_show_ = pd.concat([parade_night_show_night_show, parade_night_show_parade_1, parade_night_show_parade_2])
-		
+
 		# drop all rows of non-existing parades and shows (nan values)
 		parade_night_show_ = parade_night_show_.dropna(subset=['show_or_parade'])
 
@@ -218,7 +220,7 @@ class DataLoader:
 		time_change_30 = datetime.timedelta(minutes=30)
 		parade_night_show_15['show_or_parade'] = parade_night_show_15['show_or_parade'].apply(lambda t: (datetime.datetime.combine(datetime.date.today(),t) + time_change_15).time())
 		parade_night_show_30['show_or_parade'] = parade_night_show_30['show_or_parade'].apply(lambda t: (datetime.datetime.combine(datetime.date.today(),t) + time_change_30).time())
-		
+
 		# concat all the granular df into one
 		parade_night_show_granular = pd.concat([parade_night_show_, parade_night_show_15, parade_night_show_30])
 
@@ -236,7 +238,7 @@ class DataLoader:
 		"""
 		attractions = self.link_attraction_park['ATTRACTION'].tolist()
 		self.entity_schedule = self.entity_schedule[self.entity_schedule['ENTITY_DESCRIPTION_SHORT'].isin(attractions + ['PortAventura World'])]
-		
+
 		# modify date types
 		self.entity_schedule["DEB_TIME"] = self.entity_schedule["DEB_TIME"].astype("datetime64[s]")
 		self.entity_schedule["FIN_TIME"] = self.entity_schedule["FIN_TIME"].astype("datetime64[s]")
@@ -327,7 +329,7 @@ class DataLoader:
 	def preprocess_entity_schedule(self):
 		"""
 		Preprocess the data.
-	
+
 		"""
 		self.entity_schedule.loc[self.entity_schedule['DEB_TIME'].dt.year.isin([2018, 2019]), 'DEB_TIME'] += pd.DateOffset(years=2)
 		self.entity_schedule.loc[self.entity_schedule['FIN_TIME'].dt.year.isin([2018, 2019]), 'FIN_TIME'] += pd.DateOffset(years=2)
@@ -348,7 +350,7 @@ class DataLoader:
 		#changing the date of the data to falsify 2021 and 2020 data to accomodate the model
 		# Add 2 years to rows with year 2018 and 2019
 		self.attendance.loc[self.attendance['USAGE_DATE'].dt.year.isin([2018, 2019]), 'USAGE_DATE'] += pd.DateOffset(years=2)
-	
+
 
 	def data_preprocessing_attendance_pred(self):
 		"""
