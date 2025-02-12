@@ -1,15 +1,12 @@
 from dash import html, dcc
 import dash_bootstrap_components as dbc
 from datetime import datetime, timedelta
-from endless_line.data_utils.dashboard_utils import DashboardUtils
-
-board_utils = DashboardUtils()
 
 def create_date_options():
     """Create date options for the next 5 days"""
     today = datetime.now()
     date_options = []
-    for i in range(5):
+    for i in range(1, 6):
         date = today + timedelta(days=i)
         date_options.append({
             'label': date.strftime("%A, %B %d"),  # e.g., "Monday, June 5"

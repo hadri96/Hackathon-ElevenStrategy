@@ -57,7 +57,7 @@ layout = html.Div([
             dbc.Col([
                 create_feature_card(
                     "Interactive Dashboard",
-                    "Monitor real-time wait times, weather conditions, and crowd levels. Make informed decisions about which attractions to visit next.",
+                    "Monitor forecasted wait times, weather conditions, and crowd levels for the next 5 days. Make informed decisions about which attractions to visit next.",
                     "fa-chart-line",
                     "/dashboard"
                 )
