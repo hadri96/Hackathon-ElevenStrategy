@@ -140,6 +140,10 @@ class DataLoader:
 		if 'WORK_DATE' not in df.columns:
 			print("Error: 'WORK_DATE' column not found in the DataFrame.")
 			return None
+		
+		# Convert DEB_TIME and FIN_TIME to datetime
+		df["DEB_TIME"] = df["DEB_TIME"].astype("datetime64[s]")
+		df["FIN_TIME"] = df["FIN_TIME"].astype("datetime64[s]")
 
 		# Convert 'WORK_DATE' to datetime objects.
 		# Assuming 'WORK_DATE' is in DD/MM/YYYY format. Adjust format if necessary.
@@ -261,11 +265,11 @@ class DataLoader:
 		self.entity_schedule["UPDATE_TIME"] = self.entity_schedule["UPDATE_TIME"].astype("datetime64[s]")
 		self.entity_schedule["WORK_DATE"] = self.entity_schedule["WORK_DATE"].astype("datetime64[s]")
 
-		# entity_schedule (to clean waiting time)
+		# entity_schedule to clean waiting time
 		self.entity_schedule['IS_OPEN'] = self.entity_schedule['REF_CLOSING_DESCRIPTION'].isnull().astype(int)
 		self.entity_schedule = self.entity_schedule[['WORK_DATE', 'ENTITY_DESCRIPTION_SHORT', 'IS_OPEN']]
 
-		# entity_schedule
+		# entity_schedule as pivot table
 		self.entity_schedule_pivot = pd.pivot_table(self.entity_schedule, values='IS_OPEN', index=['WORK_DATE'], columns=['ENTITY_DESCRIPTION_SHORT'])
 		self.entity_schedule_pivot = self.entity_schedule_pivot.reset_index()
 		self.entity_schedule_pivot = self.entity_schedule_pivot.drop(columns='Vertical Drop')
@@ -292,7 +296,13 @@ class DataLoader:
 		"""
 		self.preprocess_weather()
 		self.preprocess_attendance()
-		pass
+		self.preprocess_waiting_times()
+		self.preprocess_entity_schedule()
+		self.preprocess_link_attraction_park()
+		self.preprocess_parade_night_show()
+		self.preprocess_parade_night_show_attendance()
+
+		self.merge()
 
 	def preprocess_waiting_times(self):
 		"""
@@ -347,19 +357,29 @@ class DataLoader:
 		"""
 		Preprocess the data.
 		"""
-		self.parade_night_show.loc[self.parade_night_show['show_or_para'].dt.year.isin([2018, 2019]), 'show_or_para'] += pd.DateOffset(years=2)
-		self.parade_night_show.loc[self.parade_night_show['WORK_DATE'].dt.year.isin([2018, 2019]), 'WORK_DATE'] += pd.DateOffset(years=2)
+		self.parade_night_show = self.parade_night_show.drop(columns='WORK_DATE')
+		self.parade_night_show.loc[self.parade_night_show['show_or_parade'].dt.year.isin([2018, 2019]), 'show_or_parade'] += pd.DateOffset(years=2)
+		#self.parade_night_show.loc[self.parade_night_show['WORK_DATE'].dt.year.isin([2018, 2019]), 'WORK_DATE'] += pd.DateOffset(years=2)
 		pass
+
+	def preprocess_parade_night_show_attendance(self):
+		"""
+		Preprocess the data.
+	
+		"""
+		self.parade_night_show_attendance.loc[self.parade_night_show_attendance['WORK_DATE'].dt.year.isin([2018, 2019]), 'WORK_DATE'] += pd.DateOffset(years=2)
 
 	def preprocess_entity_schedule(self):
 		"""
 		Preprocess the data.
 	
 		"""
-		self.entity_schedule.loc[self.entity_schedule['DEB_TIME'].dt.year.isin([2018, 2019]), 'DEB_TIME'] += pd.DateOffset(years=2)
+		# currently we have dropped those columns
+		"""self.entity_schedule.loc[self.entity_schedule['DEB_TIME'].dt.year.isin([2018, 2019]), 'DEB_TIME'] += pd.DateOffset(years=2)
 		self.entity_schedule.loc[self.entity_schedule['FIN_TIME'].dt.year.isin([2018, 2019]), 'FIN_TIME'] += pd.DateOffset(years=2)
-		self.entity_schedule.loc[self.entity_schedule['UPDATE_TIME'].dt.year.isin([2018, 2019]), 'UPDATE_TIME'] += pd.DateOffset(years=2)
+		self.entity_schedule.loc[self.entity_schedule['UPDATE_TIME'].dt.year.isin([2018, 2019]), 'UPDATE_TIME'] += pd.DateOffset(years=2)"""
 		self.entity_schedule.loc[self.entity_schedule['WORK_DATE'].dt.year.isin([2018, 2019]), 'WORK_DATE'] += pd.DateOffset(years=2)
+		self.entity_schedule_pivot.loc[self.entity_schedule_pivot['WORK_DATE'].dt.year.isin([2018, 2019]), 'WORK_DATE'] += pd.DateOffset(years=2)
 		pass
 
 	def preprocess_link_attraction_park(self):
@@ -376,6 +396,40 @@ class DataLoader:
 		# Add 2 years to rows with year 2018 and 2019
 		self.attendance.loc[self.attendance['USAGE_DATE'].dt.year.isin([2018, 2019]), 'USAGE_DATE'] += pd.DateOffset(years=2)
 
+	def merge(self):
+		"""
+			Merge all tables for model.
+		"""
+		self.merge_parade_night_show()
+		self.merge_parade_night_show_attendance()
+		self.merge_entity_schedule_pivot()
+		self.merge_entity_schedule()
+
+	def merge_parade_night_show(self):
+		"""
+			merge waiting_times with parade_night_show
+		"""
+		self.merged = self.waiting_times.merge(self.parade_night_show, left_on='DEB_TIME', right_on='show_or_parade', how='left')
+		self.merged['show_or_parade'] = self.merged['show_or_parade'].notnull().astype(int)
+		
+	def merge_parade_night_show_attendance(self):
+		"""
+			merge waiting_times with parade_night_show_attendance
+		"""
+		self.merged = self.merged.merge(self.parade_night_show_attendance, left_on='WORK_DATE', right_on='WORK_DATE', how='left')
+
+	def merge_entity_schedule_pivot(self):
+		"""
+			merge waiting_times with entity_schedule_pivot
+		"""
+		self.merged = self.merged.merge(self.entity_schedule_pivot, left_on='WORK_DATE', right_on='WORK_DATE', how='left')
+
+	def merge_entity_schedule(self):
+		"""
+			merge waiting_times with entity_schedule
+		"""
+		self.merged = self.merged.merge(self.entity_schedule, left_on=['WORK_DATE', 'ENTITY_DESCRIPTION_SHORT'], right_on=['WORK_DATE', 'ENTITY_DESCRIPTION_SHORT'], how='left')
+
 	def round_to_quarter(self, dt, down=True):
 		"""
 			Takes datetime64 as input (e.g. 9:10).
@@ -389,14 +443,14 @@ class DataLoader:
 			rounded_minutes = max(rounded_minutes, 15) # avoid going below midnight
 		else:
 			rounded_minutes = min(rounded_minutes, 23 * 60 + 45)  # avoid going above midnight
-		return dt.replace(hour=rounded_minutes // 60, minute=rounded_minutes % 60)  # Convert back to time
+		return dt.replace(hour=rounded_minutes // 60, minute=rounded_minutes % 60)  # Convert back to datetime
 	
 
 	def data_preprocessing_attendance_pred(self):
 		"""
 		Preprocess the data for the attedance prediction model.
 		"""
-		self.data_preprocessing()
+		self.data_preprocessing()	# calling this function here might cause exceptions (e.g. key error if preprocessing tries to drop already dropped columns)
 		self.weather.drop(columns=['hour'], inplace=True)
 		self.weather = self.weather[self.weather['dt_iso'].dt.hour == 12].copy()
 		self.weather['dt_iso'] = self.weather['dt_iso'].dt.date
