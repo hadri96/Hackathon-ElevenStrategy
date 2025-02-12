@@ -14,7 +14,7 @@ import plotly.graph_objects as go
 import pandas as pd
 from endless_line.data_utils.weather_forecast import WeatherForecast
 import json
-
+from endless_line.data_utils.dashboard_utils import DashboardUtils
 
 
 # Import your app instance from app.py
@@ -24,14 +24,7 @@ from endless_line.interface.app import app
 # Mock Data & Utility Functions
 ########################################
 
-ALL_ATTRACTIONS = [
-    "Roller Coaster",
-    "Ferris Wheel",
-    "Haunted House",
-    "Merry-Go-Round",
-    "Bumper Cars"
-]
-
+ALL_ATTRACTIONS = DashboardUtils().get_attractions()
 
 def get_mock_wait_times(selected_date):
     hours = list(range(9, 23))  # 9 AM to 10 PM
@@ -132,7 +125,7 @@ def update_dashboard(n_clicks, selected_date, selected_hour, closed_attractions,
         df_wait = df_wait[~df_wait["attraction"].isin(closed_attractions)]
 
     if selected_hour is None:
-        selected_hour = 12  # Default to noon
+        selected_hour = datetime.datetime.now().hour+1  # Default to actual hour +1
         if is_scrollable:
             # Create a subplot for each attraction
             open_attractions = [attr for attr in ALL_ATTRACTIONS if attr not in (closed_attractions or [])]
@@ -251,17 +244,6 @@ def update_dashboard(n_clicks, selected_date, selected_hour, closed_attractions,
     # Create attendance widget and weather card
     attendance = 25000  # Replace with actual attendance data
     attendance_widget = create_attendance_widget(attendance)
-
-    row = {
-        "dt_iso": "2025-02-10 18:00:00",
-        "temp": 5.59,
-        "feels_like": 3.96,
-        "weather_main": "Rain",
-        "weather_description": "moderate rain",
-        "weather_icon": "10n",
-        "humidity": 75,
-        "wind_speed": 3.5
-    }
 
     weather_forecast = WeatherForecast().get_forecast(selected_date, selected_hour)
     if not weather_forecast.empty:
