@@ -483,6 +483,7 @@ class DataLoader:
 		self.merge_parade_night_show_attendance()
 		self.merge_entity_schedule_pivot()
 		self.merge_entity_schedule()
+		self.merge_attendance()
 		
 	def merge_parade_night_show(self):
 		"""
@@ -512,6 +513,12 @@ class DataLoader:
 		"""
 		self.merged = self.merged.merge(self.entity_schedule, left_on=['WORK_DATE', 'ENTITY_DESCRIPTION_SHORT'], right_on=['WORK_DATE', 'ENTITY_DESCRIPTION_SHORT'], how='left')
 		self.merged = self.merged.sort_values('DEB_TIME').bfill()
+
+	def merge_attendance(self):
+		"""
+			merge waiting_times with attendance
+		"""
+		self.merged = self.merged.merge(self.attendance, left_on='WORK_DATE', right_on='USAGE_DATE', how='left').drop(columns='USAGE_DATE')
 
 	def round_to_quarter(self, dt, down=True):
 		"""
