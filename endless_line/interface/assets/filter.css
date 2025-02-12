@@ -86,7 +86,6 @@
 	background: rgba(255, 255, 255, 0.95);
 	backdrop-filter: blur(10px);
 	transition: left 0.3s ease;
-	z-index: 1000;
 	overflow-y: auto;
 	padding: 2rem;
 	box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
@@ -95,4 +94,18 @@
 /* Show filter menu when active */
 .filter-menu.active {
 	left: 0;
+}
+#date-picker-dash {
+	position: relative;
+}
+
+#attendance-widget-dash,
+#weather-forecast-dash{
+	position: relative;
+	z-index: -1 !important;
+}
+
+.SingleDatePickerInput {
+	position: relative;
+	z-index: 1000 !important;
 }

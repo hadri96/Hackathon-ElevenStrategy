@@ -88,7 +88,6 @@
 /* Content positioning */
 .card-content {
 	position: relative;
-	z-index: 1;
 }
 
 /* Title glow effect */
