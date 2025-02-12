@@ -25,7 +25,10 @@ from endless_line.interface.app import app
 # Mock Data & Utility Functions
 ########################################
 
-ALL_ATTRACTIONS = DashboardUtils().get_attractions()
+board_utils = DashboardUtils()
+
+ALL_ATTRACTIONS = board_utils.get_attractions()
+
 
 def get_mock_wait_times(selected_date):
     hours = list(range(9, 23))  # 9 AM to 10 PM
