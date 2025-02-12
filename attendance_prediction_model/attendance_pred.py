@@ -16,7 +16,7 @@ def attendance_forecasting(pre_covid=False):
 	'''
 	Returns a list of the 5 day forecast of attendance
 	'''
-	data.data_preprocessing_attendance_pred()
+	#data.data_preprocessing_attendance_pred()
 
 	df = data.attendance
 	df_weather = data.weather
@@ -42,7 +42,6 @@ def attendance_forecasting(pre_covid=False):
 	merged_df["USAGE_DATE"] = merged_df["USAGE_DATE"] + pd.Timedelta(days=days_to_shift)
 
 	merged_df['USAGE_DATE'] = merged_df['USAGE_DATE'].dt.date
-
 
 	# We now need to get the weather data from the forecast, and preprocess it in a similar way
 	forecast_data = call_the_weather_forecast()
@@ -200,8 +199,3 @@ def plot_the_forecast(forecast_data, pre_covid=False):
     plt.ylabel('Attendance')
     plt.legend()
     plt.show()
-
-
-
-forecast_data = attendance_forecasting()
-plot_the_forecast(forecast_data)

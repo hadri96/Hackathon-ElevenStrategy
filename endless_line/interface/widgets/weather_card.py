@@ -21,7 +21,7 @@ def create_weather_card(weather_info):
     icon_code = weather_info.get("weather_icon", "01d")  # default if missing
     icon_url = f"https://openweathermap.org/img/wn/{icon_code}@4x.png"
 
-    date_str = weather_info.get("dt_txt", "N/A")  # "2025-02-10 18:00:00"
+    date_str = weather_info.get("dt_iso", "N/A")  # "2025-02-10 18:00:00"
     dt_obj = datetime.datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S")
     formatted_dt = dt_obj.strftime("%b %d, %I:%M %p")
     main_condition = weather_info.get("weather_main", "Clear")
