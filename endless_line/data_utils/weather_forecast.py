@@ -24,7 +24,9 @@ class WeatherForecast:
 					'appid': self.weather_api_key
 		}
 		forecast = requests.get(url, params=params).json()
-		return self.clean_forecast(forecast)
+		#print('Forecast:', forecast)
+		cleaned_forecast = self.clean_forecast(forecast)
+		return cleaned_forecast
 
 	def clean_forecast(self, forecast):
 		"""
@@ -58,12 +60,11 @@ class WeatherForecast:
 			keys_to_remove = {'sys', 'rain', 'weather', 'clouds', 'main', 'wind', 'pop', 'dt', 'visibility'}
 			for key in keys_to_remove:
 				stamp.pop(key, None)
-
 		forecast_df = pd.DataFrame(forecast['list'])
 		forecast_df['dt_txt'] = pd.to_datetime(forecast_df['dt_txt'], format='%Y-%m-%d %H:%M:%S')
 		forecast_df.rename(columns={'dt_txt': 'dt_iso'}, inplace=True)
 		# Resample and interpolate 3-hourly data to hourly data with forward fill
-		forecast_df = forecast_df.set_index('dt_txt').resample('h').interpolate(method='ffill', limit_direction='forward')
+		forecast_df = forecast_df.set_index('dt_iso').resample('h').interpolate(method='ffill', limit_direction='forward')
 		forecast_df.reset_index(inplace=True)
 		## TO DO CHECK OPENING TIMES OF PARK AND REMOVE DATA OUTSIDE OF OPENING TIMES
 		return forecast_df
