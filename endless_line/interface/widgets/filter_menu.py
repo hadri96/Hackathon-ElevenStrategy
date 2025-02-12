@@ -1,7 +1,6 @@
 from dash import html, dcc
 import dash_bootstrap_components as dbc
 from datetime import datetime, timedelta
-
 from endless_line.data_utils.dashboard_utils import DashboardUtils
 
 ALL_ATTRACTIONS = DashboardUtils().get_attractions()
