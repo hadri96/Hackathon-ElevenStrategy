@@ -4,7 +4,8 @@ from dash.dependencies import Input, Output, State
 from endless_line.interface import home, about, dashboard, when
 from endless_line.interface.widgets.navbar import create_navbar
 from endless_line.interface.app import app, server
-  # import page layouts
+from warnings import filterwarnings
+filterwarnings("ignore")
 
 # Define the main menu or navigation bar (optional)
 navbar = create_navbar()
@@ -31,8 +32,6 @@ def display_page(pathname):
     elif pathname in ["/when-to-go", "/when"]:
         return when.layout
     else:
-        # Handle 404 - Page Not Found
-        raise Exception(f"404 - Page not found: {pathname}")
         return html.H1("404: Page not found", className="text-danger")
 
 @app.callback(
@@ -45,6 +44,7 @@ def toggle_navbar_collapse(n, is_open):
     if n:
         return not is_open
     return is_open
+
 if __name__ == "__main__":
     # Run the server
     app.run_server(debug=True)

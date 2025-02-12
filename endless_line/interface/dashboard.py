@@ -16,6 +16,9 @@ from endless_line.data_utils.weather_forecast import WeatherForecast
 import json
 from endless_line.data_utils.dashboard_utils import DashboardUtils
 from attendance_prediction_model.attendance_pred import attendance_forecasting
+from warnings import filterwarnings
+
+filterwarnings("ignore")
 
 
 # Import your app instance from app.py
@@ -56,11 +59,11 @@ layout = dbc.Container([
 
     # ---- OUTPUT SECTION ----
     dbc.Row([
-        # Weather Forecast
+        # Weather Forecast and Attendance Column
         dbc.Col([
-            html.Div(id="attendance-widget-dash"),
+            html.Div(id="attendance-widget-dash", className="mb-3"),  # Added margin-bottom
             html.Div(id="weather-forecast-dash")
-        ], width=4),
+        ], width=4, className="d-flex flex-column"),  # Added flex display
 
         # Graphs with header card
         dbc.Col([

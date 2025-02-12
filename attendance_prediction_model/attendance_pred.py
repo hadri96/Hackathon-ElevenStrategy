@@ -6,13 +6,15 @@ from sklearn.preprocessing import MinMaxScaler
 from datetime import datetime, timedelta
 import matplotlib.pyplot as plt
 from prophet import Prophet
-
+import pickle
+import os
+from endless_line.models.model_utils import save_model, load_model
 
 data = DataLoader(load_all_files=True)
 data.clean_data()
 data.data_preprocessing()
 
-def attendance_forecasting(pre_covid=False):
+def attendance_forecasting(pre_covid=False, save=True):
 	'''
 	Returns a list of the 5 day forecast of attendance
 	'''
@@ -77,11 +79,15 @@ def attendance_forecasting(pre_covid=False):
 	# Fit on df_train only (the rows where attendance is known)
 	m.fit(df_train)
 
+	if save:
+		save_model(m, "prophet_model.pkl")
+
 	forecast_future = m.predict(df_future)
 
 	# forecast_future will include columns like 'yhat', 'yhat_lower', 'yhat_upper', etc.
 	#print(forecast_future[['ds', 'yhat', 'yhat_lower', 'yhat_upper']])
 	return forecast_future[['ds', 'yhat']]
+
 
 def merge_for_attendance_forecasting(df, df_weather):
 	df_weather['dt_iso'] = pd.to_datetime(df_weather['dt_iso'])
@@ -185,11 +191,11 @@ def plot_the_forecast(forecast_data, pre_covid=False):
 
     # Plot the results
     plt.figure(figsize=(10, 5))
-    
+
     # Plot known attendance (historical data)
     df_known = df_new[~df_new['y'].isna()]
     plt.plot(df_known['ds'], df_known['y'], label='Known Attendance', color='blue')
-    
+
     # Plot predicted attendance (forecast)
     df_pred = df_new[df_new['predicted_attendance'].notna()]
     plt.plot(df_pred['ds'], df_pred['predicted_attendance'], label='Predicted Attendance', color='red', linestyle='--')
