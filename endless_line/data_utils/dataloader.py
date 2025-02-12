@@ -483,6 +483,7 @@ class DataLoader:
 		self.merge_parade_night_show_attendance()
 		self.merge_entity_schedule_pivot()
 		self.merge_entity_schedule()
+		self.merge_weather()
 		self.merge_attendance()
 		
 	def merge_parade_night_show(self):
@@ -512,6 +513,19 @@ class DataLoader:
 			merge waiting_times with entity_schedule
 		"""
 		self.merged = self.merged.merge(self.entity_schedule, left_on=['WORK_DATE', 'ENTITY_DESCRIPTION_SHORT'], right_on=['WORK_DATE', 'ENTITY_DESCRIPTION_SHORT'], how='left')
+		self.merged = self.merged.sort_values('DEB_TIME').bfill()
+
+	def merge_weather(self):
+		"""
+			merge waiting_times with weather
+		"""
+		self.merged["DEB_TIME_2"] = pd.to_datetime(self.merged["WORK_DATE"]) + pd.to_timedelta(self.merged["DEB_TIME_HOUR"], unit="h")
+		self.weather["dt_iso"] = pd.to_datetime(self.weather["dt_iso"])
+
+		# Merge on matching datetime values
+		self.merged = self.merged.merge(self.weather, left_on="DEB_TIME_2", right_on="dt_iso", how="left")
+
+		self.merged.drop(columns=["dt_iso", "DEB_TIME_2"], inplace=True)
 		self.merged = self.merged.sort_values('DEB_TIME').bfill()
 
 	def merge_attendance(self):
