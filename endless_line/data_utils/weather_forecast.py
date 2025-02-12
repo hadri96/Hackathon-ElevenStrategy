@@ -3,6 +3,7 @@ import os
 import requests
 import pandas as pd
 from endless_line.data_utils.dataloader import DataLoader
+from datetime import datetime
 
 class WeatherForecast:
 	def __init__(self):
@@ -15,7 +16,7 @@ class WeatherForecast:
 		else:
 			raise ValueError(".secret file not found, please create .secret file in the root directory with your API keys")
 
-	def get_forecast(self, lat: float=48.873492, lon: float=2.295104):
+	def get_forecast(self, selected_date, selected_hour=12, lat: float=48.873492, lon: float=2.295104):
 		url = 'https://api.openweathermap.org/data/2.5/forecast?'
 		params = {
 					'lat': lat,
@@ -24,7 +25,12 @@ class WeatherForecast:
 					'appid': self.weather_api_key
 		}
 		forecast = requests.get(url, params=params).json()
-		return self.clean_forecast(forecast)
+		cleaned_forecast = self.clean_forecast(forecast)
+		# Selected date format: 2025-02-12
+		# Desired format: 2025-02-12 12:00:00
+		new_date_str = selected_date + f' {selected_hour}:00:00'
+		cleaned_forecast = cleaned_forecast[cleaned_forecast['dt_iso'] == new_date_str]
+		return cleaned_forecast
 
 	def clean_forecast(self, forecast):
 		"""
@@ -58,12 +64,11 @@ class WeatherForecast:
 			keys_to_remove = {'sys', 'rain', 'weather', 'clouds', 'main', 'wind', 'pop', 'dt', 'visibility'}
 			for key in keys_to_remove:
 				stamp.pop(key, None)
-
 		forecast_df = pd.DataFrame(forecast['list'])
 		forecast_df['dt_txt'] = pd.to_datetime(forecast_df['dt_txt'], format='%Y-%m-%d %H:%M:%S')
 		forecast_df.rename(columns={'dt_txt': 'dt_iso'}, inplace=True)
 		# Resample and interpolate 3-hourly data to hourly data with forward fill
-		forecast_df = forecast_df.set_index('dt_txt').resample('h').interpolate(method='ffill', limit_direction='forward')
+		forecast_df = forecast_df.set_index('dt_iso').resample('h').interpolate(method='ffill', limit_direction='forward')
 		forecast_df.reset_index(inplace=True)
 		## TO DO CHECK OPENING TIMES OF PARK AND REMOVE DATA OUTSIDE OF OPENING TIMES
 		return forecast_df
