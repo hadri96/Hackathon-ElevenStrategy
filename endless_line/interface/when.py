@@ -1,15 +1,13 @@
 from dash import html
 import dash_bootstrap_components as dbc
 from endless_line.interface.widgets.when_to_go_filters import create_when_to_go_filters
+from endless_line.data_utils.dashboard_utils import DashboardUtils
+
+board_utils = DashboardUtils()
+ALL_ATTRACTIONS = board_utils.get_attractions()
 
 # List of attractions (you can move this to a central configuration later)
-ALL_ATTRACTIONS = [
-    "Roller Coaster",
-    "Ferris Wheel",
-    "Haunted House",
-    "Merry-Go-Round",
-    "Bumper Cars"
-]
+
 
 layout = dbc.Container([
     # Header Section

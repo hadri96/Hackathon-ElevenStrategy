@@ -21,14 +21,9 @@ from endless_line.interface.app import app
 # Mock Data & Utility Functions
 ########################################
 
+board_utils = DashboardUtils()
 
-ALL_ATTRACTIONS = [
-    "Roller Coaster",
-    "Ferris Wheel",
-    "Haunted House",
-    "Merry-Go-Round",
-    "Bumper Cars"
-]
+ALL_ATTRACTIONS = board_utils.get_attractions()
 
 
 def get_mock_wait_times(selected_date):

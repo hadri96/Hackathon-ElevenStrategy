@@ -1,14 +1,10 @@
 from dash import html, dcc
 import dash_bootstrap_components as dbc
 from datetime import datetime, timedelta
+from endless_line.data_utils.dashboard_utils import DashboardUtils
 
-ALL_ATTRACTIONS = [
-    "Roller Coaster",
-    "Ferris Wheel",
-    "Haunted House",
-    "Merry-Go-Round",
-    "Bumper Cars"
-]
+board_utils = DashboardUtils()
+ALL_ATTRACTIONS = board_utils.get_attractions()
 
 def create_filter_menu():
     """Create a clean, contained filter section for the dashboard."""

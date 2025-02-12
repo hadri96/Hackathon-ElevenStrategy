@@ -4,7 +4,11 @@ import git
 import pandas as pd
 import datetime
 from sklearn.preprocessing import MinMaxScaler, LabelEncoder
-
+import boto3
+from botocore.config import Config
+from dotenv import load_dotenv
+import os
+from io import StringIO
 
 class DataLoader:
 	"""A class to handle loading data files from a specified directory.
@@ -30,7 +34,7 @@ class DataLoader:
 		`load_all_files()` -> `None`: Load all the files in the data directory.¨
 		`clean_data()` -> `None`: Clean the data.
 	"""
-	def __init__(self, data_dir_path: str = "data", load_all_files: bool = False, clean_data: bool = False):
+	def __init__(self, data_dir_path: str = "data", load_all_files: bool = False, clean_data: bool = False, db: bool = False):
 		"""Initializes the DataLoader.
 
 	Args:
@@ -47,10 +51,11 @@ class DataLoader:
 	"""
 		self.root_dir = self._find_git_root()
 		self.data_dir_path = os.path.join(self.root_dir, data_dir_path)
-		if load_all_files:
+		if load_all_files and not db:
 			self._load_all_files()
 		if clean_data:
 			self.clean_data()
+		self.db = db
 
 
 	def _find_git_root(self) -> str:
@@ -98,6 +103,8 @@ class DataLoader:
 		-------
 			`ValueError`: If the file is not found in the data directory
 		"""
+		if self.db:
+			return self.load_file_db(file)
 		files = os.listdir(self.data_dir_path)
 		if file not in files:
 			raise ValueError(f"File {file} not found in {self.data_dir_path}")
@@ -108,9 +115,40 @@ class DataLoader:
 		elif file.endswith(".xlsx"):
 			return pd.read_excel(os.path.join(self.data_dir_path, file))
 
+	def load_file_db(self, file: str) -> pd.DataFrame:
+		load_dotenv(os.path.join(self.root_dir, '.secret'))
+		if not file.endswith(".csv"):
+			raise ValueError(f"File {file} is not a data file")
+
+		key_id = os.getenv('B2keyID')
+		db_name = os.getenv('B2DBNAME')
+		key_name = os.getenv('B2keyNAME')
+		key_app_key = os.getenv('B2keyAPPKEY')
+		endpoint = os.getenv('B2endpoint')
+		if not key_id or not db_name or not key_name or not key_app_key or not endpoint:
+			raise ValueError("Environment variables not set")
+		config = Config(signature_version='s3v4')
+		s3 = boto3.resource(service_name='s3',
+						  config=config,
+						  endpoint_url=endpoint,
+						  aws_access_key_id=key_id,
+						  aws_secret_access_key=key_app_key)
+		bucket = s3.Bucket(db_name)
+		if file not in [obj.key for obj in bucket.objects.all()]:
+			raise ValueError(f"File {file} not found in {db_name}")
+		obj = s3.Object(db_name, file)
+		csv_data = obj.get()['Body'].read().decode('utf-8')
+		if file == "link_attraction_park.csv":
+			return pd.read_csv(StringIO(csv_data), sep=";")
+		elif file == "parade_night_show.xlsx":
+			return pd.read_excel(os.path.join(self.data_dir_path, "parade_night_show.xlsx"), index_col=0)
+		else:
+			return pd.read_csv(StringIO(csv_data))
+
+
 	def clean_data(self):
 		"""
-  		Clean the data.
+		Clean the data.
 		"""
 		self.clean_link_attraction_park() # pushed it to front. Given how we remove tivoli gardens data, it's better to put that here
 		self.clean_waiting_times()
