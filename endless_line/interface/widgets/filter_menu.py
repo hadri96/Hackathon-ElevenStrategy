@@ -2,13 +2,10 @@ from dash import html, dcc
 import dash_bootstrap_components as dbc
 from datetime import datetime, timedelta
 
-ALL_ATTRACTIONS = [
-    "Roller Coaster",
-    "Ferris Wheel",
-    "Haunted House",
-    "Merry-Go-Round",
-    "Bumper Cars"
-]
+from endless_line.data_utils.dashboard_utils import DashboardUtils
+
+ALL_ATTRACTIONS = DashboardUtils().get_attractions()
+
 
 def create_filter_menu():
     """Create a clean, contained filter section for the dashboard."""
@@ -56,7 +53,7 @@ def create_filter_menu():
                                     id="selected-hour-dash",
                                     options=[
                                         {"label": f"{i:02d}:00", "value": i}
-                                        for i in range(9, 23)
+                                        for i in range(datetime.now().hour+1, 23) # propose future hour only
                                     ],
                                     placeholder="Select time (optional)",
                                     className="mt-2"  # Add top margin

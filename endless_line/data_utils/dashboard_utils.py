@@ -11,7 +11,12 @@ class DashboardUtils:
     """
 
     def __init__(self, clean_data: bool = True):
-        self.data = DataLoader(load_all_files=True, clean_data=clean_data)
+        # self.data = DataLoader(load_all_files=True, clean_data=clean_data)
+        self.data = DataLoader(load_all_files=True)
+        if clean_data:
+            self.data.clean_data()
 
     def get_attractions(self):
-        return list(self.data.link_attraction_park.ATTRACTION.unique())
+        attraction_df = self.data.link_attraction_park
+        return attraction_df['ATTRACTION'].values
+
