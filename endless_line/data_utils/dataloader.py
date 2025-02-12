@@ -4,6 +4,7 @@ import git
 import pandas as pd
 import datetime
 from sklearn.preprocessing import MinMaxScaler, LabelEncoder
+import numpy as np
 
 
 class DataLoader:
@@ -182,6 +183,11 @@ class DataLoader:
 		# Replace outliers with the mean
 		filtered_df.loc[outlier_mask, 'GUEST_CARRIED'] = mean_guest_carried
 
+		# filter attractions to only keep port aventura world
+		attractions = self.link_attraction_park['ATTRACTION'].tolist()
+		attractions.remove('Vertical Drop')
+		filtered_df = filtered_df[filtered_df['ENTITY_DESCRIPTION_SHORT'].isin(attractions + ['PortAventura World'])]
+
 		self.waiting_times = filtered_df
 
 	def clean_weather(self):
@@ -257,7 +263,8 @@ class DataLoader:
 		Clean the entity schedule data.
 		"""
 		attractions = self.link_attraction_park['ATTRACTION'].tolist()
-		self.entity_schedule = self.entity_schedule[self.entity_schedule['ENTITY_DESCRIPTION_SHORT'].isin(attractions + ['PortAventura World'])]
+		attractions.remove('Vertical Drop')
+		self.entity_schedule = self.entity_schedule[self.entity_schedule['ENTITY_DESCRIPTION_SHORT'].isin(attractions)] # + ['PortAventura World']
 
 		self.entity_schedule = self.entity_schedule[(self.entity_schedule['WORK_DATE'] < '2020-01-01') | (self.entity_schedule['WORK_DATE'] >= '2022-01-01')]
 
@@ -273,9 +280,13 @@ class DataLoader:
 
 		# entity_schedule as pivot table
 		self.entity_schedule_pivot = pd.pivot_table(self.entity_schedule, values='IS_OPEN', index=['WORK_DATE'], columns=['ENTITY_DESCRIPTION_SHORT'])
+		self.entity_schedule_pivot.columns.name = None
 		self.entity_schedule_pivot = self.entity_schedule_pivot.reset_index()
-		self.entity_schedule_pivot = self.entity_schedule_pivot.drop(columns='Vertical Drop')
+		
+		# dealing with NaN values
+		#self.entity_schedule_pivot = self.entity_schedule_pivot.drop(columns='Vertical Drop')
 		self.entity_schedule_pivot = self.entity_schedule_pivot.bfill()
+
 
 
 	def clean_link_attraction_park(self):
@@ -303,8 +314,6 @@ class DataLoader:
 		self.preprocess_link_attraction_park()
 		self.preprocess_parade_night_show()
 		self.preprocess_parade_night_show_attendance()
-
-		self.merge()
 
 	def preprocess_waiting_times(self):
 		"""
@@ -382,7 +391,37 @@ class DataLoader:
 		self.entity_schedule.loc[self.entity_schedule['UPDATE_TIME'].dt.year.isin([2018, 2019]), 'UPDATE_TIME'] += pd.DateOffset(years=2)"""
 		self.entity_schedule.loc[self.entity_schedule['WORK_DATE'].dt.year.isin([2018, 2019]), 'WORK_DATE'] += pd.DateOffset(years=2)
 		self.entity_schedule_pivot.loc[self.entity_schedule_pivot['WORK_DATE'].dt.year.isin([2018, 2019]), 'WORK_DATE'] += pd.DateOffset(years=2)
-		pass
+		self.entity_schedule_pivot = self.entity_schedule_pivot.set_index('WORK_DATE')
+
+		# Define start and end dates
+		start_date = np.datetime64('2022-01-01')
+		end_date = np.datetime64('2022-03-31')
+
+		# Generate an array of dates
+		date_range = np.arange(start_date, end_date + np.timedelta64(1, 'D'), dtype='datetime64[D]')
+		date_range_seconds = date_range.astype('datetime64[s]')
+
+		# create empty entity_schedule_pivot with only the missing dates
+		df_missing_schedule = pd.DataFrame({'WORK_DATE': date_range_seconds}).set_index('WORK_DATE')
+		df_missing_schedule = df_missing_schedule.merge(self.entity_schedule_pivot, on='WORK_DATE', how='left').fillna(0)
+
+		# retrieve only the useful rows from self.waiting_times
+		waiting_times = self.waiting_times[(self.waiting_times['WORK_DATE'] >= '2022-01-01') & (self.waiting_times['WORK_DATE'] <= '2022-03-31')]
+		waiting_times.shape
+
+		# iterate on waiting times, and if an attraction was used at least once on that day, mark the attraction as open for that day
+		for index, row in waiting_times.iterrows():
+			if row['ENTITY_DESCRIPTION_SHORT'] in list(df_missing_schedule.columns):
+				if row['OPEN_TIME'] != 0:
+					df_missing_schedule.loc[row['WORK_DATE'], row['ENTITY_DESCRIPTION_SHORT']] = 1
+
+		# concatenate it with existing entity_schedule_pivot
+		self.entity_schedule_pivot = pd.concat([self.entity_schedule_pivot, df_missing_schedule]).sort_values('WORK_DATE')
+
+		# melt the pivoted missing schedule to match entity_schedule table
+		df_missing_schedule_ = df_missing_schedule.copy().reset_index()
+		df_melt = pd.melt(df_missing_schedule_, id_vars='WORK_DATE', var_name='ENTITY_DESCRIPTION_SHORT', value_name='IS_OPEN')
+		self.entity_schedule = pd.concat([self.entity_schedule, df_melt])
 
 	def preprocess_link_attraction_park(self):
 		"""
@@ -406,7 +445,7 @@ class DataLoader:
 		self.merge_parade_night_show_attendance()
 		self.merge_entity_schedule_pivot()
 		self.merge_entity_schedule()
-
+		
 	def merge_parade_night_show(self):
 		"""
 			merge waiting_times with parade_night_show
@@ -417,20 +456,24 @@ class DataLoader:
 	def merge_parade_night_show_attendance(self):
 		"""
 			merge waiting_times with parade_night_show_attendance
+			it deals with post covid null values by saying there was no parade on first 3 months of 2022.
 		"""
 		self.merged = self.merged.merge(self.parade_night_show_attendance, left_on='WORK_DATE', right_on='WORK_DATE', how='left')
+		self.merged['Num_parade'] = self.merged['Num_parade'].fillna(0)
 
 	def merge_entity_schedule_pivot(self):
 		"""
 			merge waiting_times with entity_schedule_pivot
 		"""
 		self.merged = self.merged.merge(self.entity_schedule_pivot, left_on='WORK_DATE', right_on='WORK_DATE', how='left')
+		self.merged = self.merged.sort_values('DEB_TIME').bfill()
 
 	def merge_entity_schedule(self):
 		"""
 			merge waiting_times with entity_schedule
 		"""
 		self.merged = self.merged.merge(self.entity_schedule, left_on=['WORK_DATE', 'ENTITY_DESCRIPTION_SHORT'], right_on=['WORK_DATE', 'ENTITY_DESCRIPTION_SHORT'], how='left')
+		self.merged = self.merged.sort_values('DEB_TIME').bfill()
 
 	def round_to_quarter(self, dt, down=True):
 		"""
