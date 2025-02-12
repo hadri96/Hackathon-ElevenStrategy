@@ -79,20 +79,22 @@ def create_when_to_go_filters(attractions_list):
                         "How brave are you when it comes to weather?",
                         className="text-muted d-block mb-2"
                     ),
-                    dcc.Slider(
-                        id="weather-resistance",
-                        min=0,
-                        max=10,
-                        step=2,
-                        value=6,
-                        marks={
-                            0: "Rain-shy ☔",
-                            3: "Adaptable 🌦",
-                            6: "Tough 💪",
-                            8: "Fearless ⚡",
-                            10: "Unstoppable 🌪"
-                        }
-                    )
+                    html.Div([
+                        dcc.Slider(
+                            id="weather-resistance",
+                            min=0,
+                            max=10,
+                            step=0.5,
+                            value=6,
+                            marks={
+                                0: "Rain-shy ☔",
+                                2.5: "Adaptable 🌦",
+                                5: "Tough 💪",
+                                7.5: "Fearless ⚡",
+                                10: "Unstoppable 🌪"
+                            }
+                        )
+                    ], style={'padding': '5px'})
                 ], width=12, className="mb-4")
             ]),
 

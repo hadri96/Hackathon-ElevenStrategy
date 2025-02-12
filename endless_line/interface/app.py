@@ -1,4 +1,3 @@
-
 ## TO DO:
 ## INPUT SECTION
 ## - Enter a day from the calendar (limited to 5 days in the future)
@@ -18,13 +17,49 @@
 
 import dash
 import dash_bootstrap_components as dbc
+from dash import html
+import os
+from endless_line.data_utils.dataloader import DataLoader
 
+data_loader = DataLoader()
 # Initialize the Dash app with any required external stylesheets
-app = dash.Dash(__name__, external_stylesheets=[
-    dbc.themes.BOOTSTRAP,
-    'https://use.fontawesome.com/releases/v6.4.0/css/all.css',
-    '/assets/style.css'
-    ])
+app = dash.Dash(
+    __name__,
+    external_stylesheets=[
+        dbc.themes.BOOTSTRAP,
+        'https://use.fontawesome.com/releases/v6.4.0/css/all.css',
+    ],
+    assets_folder=os.path.join(data_loader.root_dir,'endless_line', 'interface', 'assets')
+)
+
+# Create the background div with bubbles
+background = html.Div([
+    html.Div(className=f"light x{i}") for i in range(1, 16)
+], className="background-container")
+
+# Add the background to the app's layout
+app.index_string = '''
+<!DOCTYPE html>
+<html>
+    <head>
+        {%metas%}
+        <title>{%title%}</title>
+        {%favicon%}
+        {%css%}
+    </head>
+    <body>
+        <div class="background-container">
+            ''' + '\n            '.join([f'<div class="light x{i}"></div>' for i in range(1, 61)]) + '''
+        </div>
+        {%app_entry%}
+        <footer>
+            {%config%}
+            {%scripts%}
+            {%renderer%}
+        </footer>
+    </body>
+</html>
+'''
 
 # Configure the app
 app.config.suppress_callback_exceptions = True
