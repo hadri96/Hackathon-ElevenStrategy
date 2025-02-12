@@ -28,12 +28,12 @@ def display_page(pathname):
         return about.layout
     elif pathname == "/dashboard":
         return dashboard.layout
-    elif pathname == "/when":
+    elif pathname in ["/when-to-go", "/when"]:
         return when.layout
     else:
         # Handle 404 - Page Not Found
+        raise Exception(f"404 - Page not found: {pathname}")
         return html.H1("404: Page not found", className="text-danger")
-
 
 @app.callback(
     Output("navbar-collapse", "is_open"),

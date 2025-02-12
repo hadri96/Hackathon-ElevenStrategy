@@ -16,7 +16,7 @@ class WeatherForecast:
 		else:
 			raise ValueError(".secret file not found, please create .secret file in the root directory with your API keys")
 
-	def get_forecast(self, selected_date, selected_hour=12, lat: float=48.873492, lon: float=2.295104):
+	def get_forecast(self, selected_date=None, selected_hour=12, lat: float=48.873492, lon: float=2.295104):
 		url = 'https://api.openweathermap.org/data/2.5/forecast?'
 		params = {
 					'lat': lat,
@@ -26,6 +26,8 @@ class WeatherForecast:
 		}
 		forecast = requests.get(url, params=params).json()
 		cleaned_forecast = self.clean_forecast(forecast)
+		if selected_date is None:
+			return cleaned_forecast
 		# Selected date format: 2025-02-12
 		# Desired format: 2025-02-12 12:00:00
 		new_date_str = selected_date + f' {selected_hour}:00:00'

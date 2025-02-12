@@ -26,10 +26,10 @@ def create_filter_menu():
                             html.Div(
                                 dcc.DatePickerSingle(
                                     id="date-picker-dash",
-                                    min_date_allowed=datetime.now().date(),
+                                    min_date_allowed=datetime.now().date() + timedelta(days=1),
                                     max_date_allowed=datetime.now().date() + timedelta(days=5),
-                                    initial_visible_month=datetime.now().date(),
-                                    date=datetime.now().date(),
+                                    initial_visible_month=datetime.now().date() + timedelta(days=1),
+                                    date=datetime.now().date() + timedelta(days=1),
                                     display_format='DD/MM/YYYY',
                                     placeholder="Select a date",
                                     style={
@@ -53,7 +53,7 @@ def create_filter_menu():
                                     id="selected-hour-dash",
                                     options=[
                                         {"label": f"{i:02d}:00", "value": i}
-                                        for i in range(datetime.now().hour+1, 23) # propose future hour only
+                                        for i in range(9, 23) # propose future hour only
                                     ],
                                     placeholder="Select time (optional)",
                                     className="mt-2"  # Add top margin

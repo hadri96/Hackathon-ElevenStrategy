@@ -1,4 +1,5 @@
 from endless_line.data_utils.dataloader import DataLoader
+from datetime import datetime
 
 class DashboardUtils:
     """
@@ -19,4 +20,12 @@ class DashboardUtils:
     def get_attractions(self):
         attraction_df = self.data.link_attraction_park
         return attraction_df['ATTRACTION'].values
+    
+    def get_attendance(self, df, date: datetime.date):
+        output = df[df['ds'].dt.date.astype(str) == date]['yhat'].values[0]
+        return int(str(int(output)).replace(',', ' '))
+
+        
+    
+
 

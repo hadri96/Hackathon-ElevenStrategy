@@ -15,6 +15,7 @@ import pandas as pd
 from endless_line.data_utils.weather_forecast import WeatherForecast
 import json
 from endless_line.data_utils.dashboard_utils import DashboardUtils
+from attendance_prediction_model.attendance_pred import attendance_forecasting
 
 
 # Import your app instance from app.py
@@ -243,6 +244,9 @@ def update_dashboard(n_clicks, selected_date, selected_hour, closed_attractions,
 
     # Create attendance widget and weather card
     attendance = 25000  # Replace with actual attendance data
+    out = attendance_forecasting()
+    attendance = DashboardUtils().get_attendance(out, selected_date)
+
     attendance_widget = create_attendance_widget(attendance)
 
     weather_forecast = WeatherForecast().get_forecast(selected_date, selected_hour)
