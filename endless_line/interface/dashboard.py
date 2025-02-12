@@ -243,7 +243,6 @@ def update_dashboard(n_clicks, selected_date, selected_hour, closed_attractions,
         )
 
     # Create attendance widget and weather card
-    attendance = 25000  # Replace with actual attendance data
     out = attendance_forecasting()
     attendance = DashboardUtils().get_attendance(out, selected_date)
 
