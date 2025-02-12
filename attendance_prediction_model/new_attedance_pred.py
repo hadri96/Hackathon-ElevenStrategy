@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 from endless_line.data_utils.dataloader import DataLoader
 from endless_line.data_utils.weather_forecast import WeatherForecast
+from endless_line.models.model_utils import save_model, load_model
 from sklearn.preprocessing import MinMaxScaler
 from datetime import datetime, timedelta
 import matplotlib.pyplot as plt
@@ -59,7 +60,7 @@ def call_the_weather_forecast():
 
     # Prophet expects 'y' column for the target
     forecast_data['y'] = np.nan  # future attendance is unknown
-    
+
     return forecast_data
 
 
@@ -68,7 +69,7 @@ def call_the_weather_forecast():
 # Main functions
 # ---------------------------------------------------------------------------
 
-def train_attendance_model(data, pre_covid=False):
+def train_attendance_model(data, pre_covid=False, save=False):
     """
     Trains a Prophet model on historical attendance data, optionally
     excluding post-2022-01-01 data (pre_covid=True).
@@ -124,7 +125,10 @@ def train_attendance_model(data, pre_covid=False):
 
     m.fit(df_train)
 
-    return m, df_train
+    if save:
+        save_model(m, "prophet_model.pkl")
+
+    return m
 
 
 def predict_attendance(model, days_to_predict=5):
@@ -140,6 +144,8 @@ def predict_attendance(model, days_to_predict=5):
     Returns:
         forecast_future (pd.DataFrame): DataFrame containing at least ['ds', 'yhat'] with forecasts.
     """
+    if isinstance(model, str):
+        model = load_model(model)
 
     # 1. Get real weather forecast data
     forecast_data = call_the_weather_forecast()
@@ -150,7 +156,7 @@ def predict_attendance(model, days_to_predict=5):
     df_new['y'] = np.nan  # future attendance is unknown
     # 3. Make sure columns align with Prophet's expectations
     #    Note: df_train was already renamed for Prophet, so let's rename forecast_data columns if needed.
-    #    Since we already did rename in call_the_weather_forecast(), 
+    #    Since we already did rename in call_the_weather_forecast(),
     #    we just ensure the final set of columns is consistent.
     df_new.rename(columns={'USAGE_DATE': 'ds'}, inplace=True)
     df_new['ds'] = pd.to_datetime(df_new['ds'])
@@ -170,14 +176,16 @@ def predict_attendance(model, days_to_predict=5):
     return forecast_future[['ds', 'yhat']]
 
 
-## Usage example ##
-data = DataLoader(load_all_files=True)
-data.clean_data()
-data.data_preprocessing()
 
-# Train the model
-model, df_train = train_attendance_model(data, pre_covid=False)
+if __name__ == "__main__":
+	## Usage example ##
+	data = DataLoader(load_all_files=True)
+	data.clean_data()
+	data.data_preprocessing()
 
-# Predict the next 5 days
-forecast_result = predict_attendance(model, days_to_predict=5)
-print(forecast_result)
+	# Train the model
+	model = train_attendance_model(data, pre_covid=False, save=True)
+
+	# Predict the next 5 days
+	forecast_result = predict_attendance(model, days_to_predict=5)
+	print(forecast_result)
