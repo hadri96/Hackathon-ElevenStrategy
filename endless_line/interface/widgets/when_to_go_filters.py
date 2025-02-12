@@ -1,14 +1,9 @@
 from dash import html, dcc
 import dash_bootstrap_components as dbc
 from datetime import datetime, timedelta
+from endless_line.data_utils.dashboard_utils import DashboardUtils
 
-ALL_ATTRACTIONS = [
-    "Magic Kingdom",
-    "EPCOT",
-    "Disney's Hollywood Studios",
-    "Disney's Animal Kingdom",
-    "Disney Springs"
-]
+board_utils = DashboardUtils()
 
 def create_date_options():
     """Create date options for the next 5 days"""
