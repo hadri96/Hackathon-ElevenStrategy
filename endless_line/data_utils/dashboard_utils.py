@@ -26,11 +26,19 @@ class DashboardUtils:
     
     def compute_kpi1(self, waiting_df):
         # KPI 1: Park performance on keeping customers loyal, see business notes
+        kpis_attrac = {}
+        for attrac in self.get_attractions():
+            temp_df = waiting_df[waiting_df['ENTITY_DESCRIPTION_SHORT']==attrac]
+            wait_time_80 = temp_df['WAIT_TIME_MAX'].quantile(0.8)
+            count_sup_80 = temp_df[temp_df['WAIT_TIME_MAX'] > wait_time_80].shape[0]
+            count_percent = str(round(count_sup_80/temp_df.shape[0]*100, 2)) + '%'
+            kpis_attrac[attrac] = count_percent
         wait_time_80 = waiting_df['WAIT_TIME_MAX'].quantile(0.8)
         count_sup_80 = waiting_df[waiting_df['WAIT_TIME_MAX'] > wait_time_80].shape[0]
         count_percent = str(round(count_sup_80/waiting_df.shape[0]*100, 2)) + '%'
-        return (wait_time_80, count_sup_80, count_percent)
-
+        kpis_attrac['Global'] = count_percent
+        return kpis_attrac
+        
     def compute_kpi2(self, merged_df):
         """
         data = DataLoader(load_all_files=True)
