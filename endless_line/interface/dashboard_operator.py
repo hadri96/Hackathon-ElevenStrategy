@@ -3,7 +3,7 @@ import dash_bootstrap_components as dbc
 from endless_line.interface.widgets.filter_operator import create_operator_filter
 from endless_line.interface.widgets.predicted_attendance import create_attendance_forecast
 from endless_line.interface.widgets.predicted_waiting import create_waiting_forecast
-from endless_line.interface.widgets.kpi import create_waiting_time_kpi, create_attendance_kpi, create_churnrate_kpi
+from endless_line.interface.widgets.kpi import create_waiting_time_kpi, create_churnrate_kpi, create_wtei_ratio
 from endless_line.data_utils.dashboard_utils import DashboardUtils
 from datetime import datetime, timedelta
 
@@ -37,14 +37,17 @@ layout = dbc.Container([
     dbc.Row([
         # First KPI
         dbc.Col([
-            html.Div(id="operator-kpi-1", children=create_churnrate_kpi(dashboard_utils.compute_kpi1(attractions=ALL_ATTRACTIONS)))  # Placeholder
-        ], id="kpi-row",width=12, lg=6),
+            html.Div(id="operator-kpi-1", children=create_churnrate_kpi(dashboard_utils.compute_kpi1(attractions=ALL_ATTRACTIONS)))
+        ], width=12, lg=6),
 
-        # Second KPI
+        # WTEI Widget
         dbc.Col([
-            html.Div(id="operator-kpi-2", children=create_waiting_time_kpi(0))  # Placeholder
-        ], id="kpi-row2", width=12, lg=6)
-    ],  className="mb-4"),
+            dcc.Loading(
+                id="loading-wtei",
+                children=html.Div(id="operator-wtei-container")
+            )
+        ], width=12, lg=6, id="kpi-row2")
+    ], className="mb-4"),
 
     # Attendance Forecast
     dbc.Row([
@@ -65,14 +68,13 @@ layout = dbc.Container([
             )
         ], width=12)
     ])
-
 ], fluid=True, className="py-3")
 
 @callback(
     [Output("operator-attendance-container", "children"),
      Output("operator-waiting-times-container", "children"),
      Output("operator-kpi-1", "children"),
-     Output("operator-kpi-2", "children")],
+     Output("operator-wtei-container", "children")],
     [Input("apply-operator-filters", "n_clicks")],
     [State("date-range", "start_date"),
      State("date-range", "end_date"),
@@ -82,7 +84,7 @@ layout = dbc.Container([
 def update_operator_dashboard(n_clicks, start_date, end_date, selected_attractions):
     """Update dashboard elements based on selected attractions."""
     if not selected_attractions:
-        selected_attractions = [ALL_ATTRACTIONS[0]]  # Default to first attraction
+        selected_attractions = [ALL_ATTRACTIONS[0]]
 
     # Convert string dates to datetime objects
     end_datetime = datetime.strptime(end_date, '%Y-%m-%d') if end_date else datetime.today()
@@ -101,12 +103,13 @@ def update_operator_dashboard(n_clicks, start_date, end_date, selected_attractio
     # Create attendance forecast
     attendance_component = create_attendance_forecast()
 
-    # Update KPIs
-    avg_wait_time = dashboard_utils.compute_kpi3(attractions=selected_attractions)
-    kpi3 = create_waiting_time_kpi(avg_wait_time)
 
-    # Get churn rate for KPI2
+    # Get churn rate for KPI1
     churn_rate = dashboard_utils.compute_kpi1(selected_attractions)
-    kpi2 = create_churnrate_kpi(churn_rate)
+    kpi1 = create_churnrate_kpi(churn_rate)
 
-    return attendance_component, waiting_component, kpi2, kpi3
+    # Get WTEI ratios
+    wtei_ratios = dashboard_utils.compute_kpi2(selected_attractions)
+    kpi2 = create_wtei_ratio(wtei_ratios)
+
+    return attendance_component, waiting_component, kpi1, kpi2
