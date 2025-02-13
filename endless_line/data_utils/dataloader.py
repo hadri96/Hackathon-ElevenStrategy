@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 import git
 import pandas as pd
-import datetime
+from datetime import datetime, timedelta
 from sklearn.preprocessing import MinMaxScaler, LabelEncoder
 import boto3
 from botocore.config import Config
@@ -278,10 +278,16 @@ class DataLoader:
 		round_times = [00, 15, 30, 45]
 		parade_night_show_30 = parade_night_show_30[parade_night_show_30['show_or_parade'].apply(lambda t: t.minute not in round_times)]
 		# adding 15 and 30 min deltas
-		time_change_15 = datetime.timedelta(minutes=15)
-		time_change_30 = datetime.timedelta(minutes=30)
-		parade_night_show_15['show_or_parade'] = parade_night_show_15['show_or_parade'].apply(lambda t: (datetime.datetime.combine(datetime.date.today(),t) + time_change_15).time())
-		parade_night_show_30['show_or_parade'] = parade_night_show_30['show_or_parade'].apply(lambda t: (datetime.datetime.combine(datetime.date.today(),t) + time_change_30).time())
+		time_change_15 = timedelta(minutes=15)
+		time_change_30 = timedelta(minutes=30)
+
+		parade_night_show_15['show_or_parade'] = parade_night_show_15['show_or_parade'].apply(
+			lambda t: (datetime.combine(datetime.today(), t) + time_change_15).time()
+		)
+
+		parade_night_show_30['show_or_parade'] = parade_night_show_30['show_or_parade'].apply(
+			lambda t: (datetime.combine(datetime.today(), t) + time_change_30).time()
+		)
 
 		# concat all the granular df into one
 		parade_night_show_ = pd.concat([parade_night_show_, parade_night_show_15, parade_night_show_30])
@@ -494,7 +500,8 @@ class DataLoader:
 		self.merge_entity_schedule_pivot()
 		self.merge_entity_schedule()
 		self.merge_weather()
-		self.merge_attendance_and_scale()
+		self.merge_attendance()
+		self.scale_and_move_to_2025()
 		
 		
 	def merge_parade_night_show(self):
@@ -539,11 +546,21 @@ class DataLoader:
 		self.merged.drop(columns=["dt_iso", "DEB_TIME_2"], inplace=True)
 		self.merged = self.merged.sort_values('DEB_TIME').bfill()
 
-	def merge_attendance_and_scale(self):
+	def merge_attendance(self):
 		"""
 			merge waiting_times with attendance
 		"""
 		self.merged = self.merged.merge(self.attendance, left_on='WORK_DATE', right_on='USAGE_DATE', how='left').drop(columns='USAGE_DATE')
+
+
+	def scale_and_move_to_2025(self):
+		"""
+		Scale the data (only for rows up to 2021-12-23) and then move it so that the last date aligns with 'today' (if after noon) or 'yesterday' (if before noon).
+		"""
+
+		# Filter data up to 2021-12-23
+		self.merged = self.merged[self.merged["WORK_DATE"] <= pd.Timestamp(2021, 12, 23)].copy()
+
 		# List of numerical columns that should be scaled
 		numerical_columns = [
 			'GUEST_CARRIED', 'ADJUST_CAPACITY', 'OPEN_TIME', 'UP_TIME', 
@@ -553,9 +570,26 @@ class DataLoader:
 			'minute', 'hour', 'day', 'month', 'day_of_week', 'attendance'
 		]
 
-		# Load your dataframe (assuming df is already loaded)
+		# Scale numerical columns with MinMaxScaler
 		scaler = MinMaxScaler()
 		self.merged[numerical_columns] = scaler.fit_transform(self.merged[numerical_columns])
+
+		# Get the maximum date in the filtered dataset
+		max_date = self.merged["WORK_DATE"].max()
+
+		# Determine target date (today if after noon, yesterday if before noon)
+		now = datetime.now()
+		target_date = datetime.today().date() if now.hour >= 12 else (datetime.today() - timedelta(days=1)).date()
+
+		# Compute the shift needed
+		days_to_shift = (pd.Timestamp(target_date) - max_date).days
+
+		# Apply the shift to the relevant columns
+		self.merged["WORK_DATE"] = self.merged["WORK_DATE"] + pd.Timedelta(days=days_to_shift)
+		self.merged["WORK_DATE"] = self.merged["WORK_DATE"].dt.date
+
+		self.merged["DEB_TIME"] = self.merged["DEB_TIME"] + pd.Timedelta(days=days_to_shift)
+		self.merged["FIN_TIME"] = self.merged["FIN_TIME"] + pd.Timedelta(days=days_to_shift)
 
 	def round_to_quarter(self, dt, down=True):
 		"""
