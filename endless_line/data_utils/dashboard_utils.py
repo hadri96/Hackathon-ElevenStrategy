@@ -84,11 +84,11 @@ class DashboardUtils:
         """
         if attractions is None:
             attractions = self.attractions
-        wait_time_30_attrac = merged_df[merged_df['ATTRACTION'].isin(attractions)]['wait_time_normalized'].quantile(0.30)    
+        wait_time_30_attrac = merged_df[merged_df['ATTRACTION'].isin(attractions)]['wait_time_normalized'].quantile(0.30)
         wait_time_70_attrac = merged_df[merged_df['ATTRACTION'].isin(attractions)]['wait_time_normalized'].quantile(0.70)
         return (wait_time_30_attrac, wait_time_70_attrac)
 
-    def compute_kpi3(self, waiting_df, attractions=None):
+    def compute_kpi3(self, attractions=None):
         """
         Args:
             waiting_df: DataFrame containing the waiting times
@@ -98,8 +98,10 @@ class DashboardUtils:
         """
         if attractions is None:
             attractions = self.attractions
-        max_date = waiting_df['WORK_DATE'].max()
+        waiting_df = self.data.load_file('fictional_waiting_times.csv')
+        max_date = datetime.today()
         date_minus_month = max_date - pd.DateOffset(months=1)
         restricted_waiting_time = waiting_df[(waiting_df['WORK_DATE'] >= date_minus_month) & (waiting_df['WORK_DATE'] <= max_date)]
         benchmark_waiting_time_attrac = restricted_waiting_time[restricted_waiting_time['ENTITY_DESCRIPTION_SHORT'].isin(attractions)]['WAIT_TIME_MAX'].mean()
+        del waiting_df
         return benchmark_waiting_time_attrac
