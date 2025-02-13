@@ -88,7 +88,7 @@ class DashboardUtils:
         waiting_df = self.data.waiting_times.copy()
         waiting_df = waiting_df[waiting_df['ENTITY_DESCRIPTION_SHORT'].isin(attractions)]
         wait_time_80 = waiting_df['WAIT_TIME_MAX'].quantile(0.8)
-        count_sup_80 = waiting_df[waiting_df['WAIT_TIME_MAX'] > wait_time_80].shape[0]
+        count_sup_80 = waiting_df[(waiting_df['WAIT_TIME_MAX'] > wait_time_80) & (waiting_df['WAIT_TIME_MAX'] > 30)].shape[0]
         count_percent = str(round(count_sup_80 / waiting_df.shape[0] * 100, 2)) + '%'
         return count_percent
 
