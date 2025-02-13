@@ -4,15 +4,13 @@ import plotly.graph_objects as go
 from datetime import datetime, timedelta
 from endless_line.data_utils.dashboard_utils import DashboardUtils
 
-def create_attendance_forecast():
+def create_attendance_forecast(start_date: datetime.date = datetime.today() - timedelta(days=5)):
     """Create an attendance forecast plot showing historical and predicted values."""
 
     dashboard_utils = DashboardUtils()
 
     # Get date ranges
     current_date = datetime.today()
-    start_date = current_date - timedelta(days=5)
-
     # Get historical and predicted data
     hist, pred = dashboard_utils.get_predicted_attendance_with_past(current_date, start_date)
 

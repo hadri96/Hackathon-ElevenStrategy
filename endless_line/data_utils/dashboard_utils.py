@@ -50,7 +50,7 @@ class DashboardUtils:
         if 'Vertical Drop' in attractions:
             attractions.remove('Vertical Drop')
         self.data.predicted = self.data.load_file('lstm_attraction_wait_times.csv')
-        self.data.predicted.DEB_TIME = pd.to_datetime(self.data.predicted.DEB_TIME) + pd.Timedelta(days=365*3+1)
+        self.data.predicted.DEB_TIME = pd.to_datetime(self.data.predicted.DEB_TIME)+ pd.Timedelta(days=365*3+1)
         self.data.predicted = self.data.predicted[['DEB_TIME', 'Source'] + attractions]
         hist = self.data.predicted[self.data.predicted['Source'] == 0]
         hist = hist[(hist['DEB_TIME'] <= threshold_date) & (hist['DEB_TIME'] >= start_date)]
@@ -73,7 +73,7 @@ class DashboardUtils:
         pred['predicted'] = 1
         return hist, pred
 
-    def compute_kpi1(self, waiting_df, attractions=None):
+    def compute_kpi1(self, attractions=None):
         """
         Args:
             waiting_df: DataFrame containing the waiting times
@@ -83,9 +83,12 @@ class DashboardUtils:
         """
         if attractions is None:
             attractions = self.attractions  # use all attractions if not specified
+        self.data.waiting_times = self.data.load_file('fictional_waiting_times.csv')
+        self.data.clean_waiting_times()
+        waiting_df = self.data.waiting_times.copy()
         waiting_df = waiting_df[waiting_df['ENTITY_DESCRIPTION_SHORT'].isin(attractions)]
         wait_time_80 = waiting_df['WAIT_TIME_MAX'].quantile(0.8)
-        count_sup_80 = waiting_df[waiting_df['WAIT_TIME_MAX'] > wait_time_80].shape[0]
+        count_sup_80 = waiting_df[(waiting_df['WAIT_TIME_MAX'] > wait_time_80) & (waiting_df['WAIT_TIME_MAX'] > 30)].shape[0]
         count_percent = str(round(count_sup_80 / waiting_df.shape[0] * 100, 2)) + '%'
         return count_percent
 

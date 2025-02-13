@@ -25,9 +25,10 @@ def create_operator_filter(ALL_ATTRACTIONS):
                         max_date_allowed=max_date,
                         start_date=today - timedelta(days=3),
                         end_date=today + timedelta(days=2),
+                        display_format='DD/MM/YYYY',
                         className="mt-1"
                     )
-                ], width=12, lg=4),
+                ], width=12, lg=4, className="d-flex flex-column"),
 
                 # Attractions Multi-Select
                 dbc.Col([
@@ -40,20 +41,22 @@ def create_operator_filter(ALL_ATTRACTIONS):
                         options=[{'label': attr, 'value': attr} for attr in ALL_ATTRACTIONS],
                         value=[ALL_ATTRACTIONS[0]],
                         multi=True,
-                        className="mt-1"
+                        className="mt-1",
+                        style={'height': '100%', 'min-height': '100px'}  # Increased height
                     )
-                ], width=12, lg=6),
+                ], width=12, lg=6, className="d-flex flex-column"),
 
                 # Apply Button
                 dbc.Col([
-                    html.Label("\u00A0", className="fw-bold d-block"),  # Invisible label for alignment
-                    dbc.Button(
-                        "Apply Filters",
-                        id="apply-operator-filters",
-                        color="primary",
-                        className="w-100 mt-1"
-                    )
+                    html.Div([
+                        dbc.Button(
+                            "Apply Filters",
+                            id="apply-operator-filters",
+                            color="primary",
+                            className="w-100"
+                        )
+                    ], className="h-100 d-flex align-items-center")  # Center vertically
                 ], width=12, lg=2)
-            ], className="g-2 align-items-end")
+            ], className="g-2 align-items-stretch")  # Changed to stretch
         ])
     ], className="shadow-sm mb-4")
