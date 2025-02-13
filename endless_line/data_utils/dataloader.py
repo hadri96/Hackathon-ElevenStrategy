@@ -551,7 +551,7 @@ class DataLoader:
 		"""
 
 		# Filter data up to 2021-12-23
-		self.merged = self.merged[self.merged["WORK_DATE"] <= pd.Timestamp(2021, 12, 29)].copy()
+		self.merged = self.merged[self.merged["WORK_DATE"] <= pd.Timestamp(2021, 12, 25)].copy()
 
 		# List of numerical columns that should be scaled
 		numerical_columns = [
