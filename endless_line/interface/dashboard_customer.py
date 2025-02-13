@@ -1,8 +1,13 @@
-from dash import html, dcc
+from dash import html
 import dash_bootstrap_components as dbc
 from endless_line.interface.widgets.customer_filter import create_customer_filter
+from endless_line.interface.widgets.weather_forecast import create_weather_forecast_plot
+from endless_line.interface.widgets.predicted_attendance import create_attendance_forecast
 from endless_line.data_utils.dashboard_utils import DashboardUtils
-from endless_line.interface.app import app
+
+dashboard_utils = DashboardUtils()
+ALL_ATTRACTIONS = dashboard_utils.get_attractions()
+
 
 layout = dbc.Container([
     # Header Section with Explanation
@@ -14,35 +19,70 @@ layout = dbc.Container([
                 html.P([
                     "This dashboard helps you plan your visit to the park by showing wait times and trends for your favorite attractions. ",
                     "You can view either daily patterns to plan your visit date, or hourly details to optimize your day at the park."
-                ], className="lead"),
-                html.Hr(className="my-4"),
-                html.P([
-                    html.Strong("How to use this dashboard:"),
-                    html.Ul([
-                        html.Li("Select your attractions of interest from the dropdown menu"),
-                        html.Li("Choose between daily overview or hourly details"),
-                        html.Li("Click 'Apply Filters' to update the view"),
-                    ], className="mt-2")
-                ], className="text-muted")
-            ], className="py-4")
+                ], className="lead")
+            ], className="py-3")
         ], width=12)
-    ], className="mb-4"),
+    ]),
 
-    # Main Content
+    # Filters Section
     dbc.Row([
-        # Left Column - Filters
         dbc.Col([
-            create_customer_filter()
-        ], width=12, lg=3, className="mb-4"),
+            create_customer_filter(ALL_ATTRACTIONS)
+        ], width=12)
+    ]),
 
-        # Right Column - Visualizations
+    # Main Visualizations
+    dbc.Row([
+        # Attendance Forecast
+        dbc.Col([
+            create_attendance_forecast()
+        ], width=12, lg=8),
+
+        # Daily Statistics
         dbc.Col([
             dbc.Card([
+                dbc.CardHeader([
+                    html.H5("Daily Statistics 📊", className="mb-0")
+                ]),
                 dbc.CardBody([
-                    html.Div(id="customer-graph", className="mb-4"),
+                    html.Div(id="daily-stats")
+                ])
+            ], className="shadow-sm h-100")
+        ], width=12, lg=4)
+    ], className="mb-4"),
+
+    # Secondary Visualizations
+    dbc.Row([
+        # Crowd Patterns
+        dbc.Col([
+            dbc.Card([
+                dbc.CardHeader([
+                    html.H5("Attraction Wait Times 🎡", className="mb-0")
+                ]),
+                dbc.CardBody([
+                    html.Div(id="customer-graph")
+                ])
+            ], className="shadow-sm h-100")
+        ], width=12, lg=6),
+
+        # Peak Hours
+        dbc.Col([
+            dbc.Card([
+                dbc.CardHeader([
+                    html.H5("Peak Hours Analysis ⏰", className="mb-0")
+                ]),
+                dbc.CardBody([
                     html.Div(id="customer-stats")
                 ])
-            ], className="shadow-sm")
-        ], width=12, lg=9)
+            ], className="shadow-sm h-100")
+        ], width=12, lg=6)
+    ], className="mb-4"),
+
+    # Weather Forecast Row
+    dbc.Row([
+        dbc.Col([
+            create_weather_forecast_plot()
+        ], width=12)
     ])
-], fluid=True, className="py-4")
+
+], fluid=True, className="py-3")

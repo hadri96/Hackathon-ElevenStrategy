@@ -24,6 +24,20 @@ class DashboardUtils:
         output = df[df['ds'].dt.date.astype(str) == date]['yhat'].values[0]
         return int(str(int(output)).replace(',', ' '))
 
+    def get_predicted_attendance_with_past(self, current_date: datetime.date, start_date: datetime.date):
+        self.data.attendance = self.data.load_file('attendance.csv')
+        self.data.clean_attendance()
+        self.data.preprocess_attendance()
+        hist = self.data.attendance.copy()
+        hist['USAGE_DATE'] += timedelta(days=365*3+1)
+        hist = hist[(hist['USAGE_DATE'] <= current_date) & (hist['USAGE_DATE'] >= start_date)].reset_index(drop=True)
+        hist['predicted'] = 0
+
+        pred = predict_attendance('prophet_model.pkl')
+        pred.rename(columns={'ds': 'USAGE_DATE', 'yhat': 'attendance'}, inplace=True)
+        pred['predicted'] = 1
+        return hist, pred
+
     def compute_kpi1(self, waiting_df):
         # KPI 1: Park performance on keeping customers loyal, see business notes
         kpis_attrac = {}

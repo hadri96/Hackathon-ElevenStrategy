@@ -1,73 +1,38 @@
 from dash import html, dcc
 import dash_bootstrap_components as dbc
-from endless_line.data_utils.dashboard_utils import DashboardUtils
 
-def create_customer_filter():
-    """Create a filter widget for customer dashboard."""
-
-    # Get list of attractions
-    ALL_ATTRACTIONS = DashboardUtils().get_attractions()
+def create_customer_filter(ALL_ATTRACTIONS):
+    """Create a horizontal filter widget for customer dashboard."""
 
     return dbc.Card([
-        dbc.CardHeader([
-            html.H4("Customize Your View", className="mb-0 d-flex align-items-center"),
-        ]),
         dbc.CardBody([
-            # Attractions Multi-Select
             dbc.Row([
+                # Attractions Multi-Select
                 dbc.Col([
                     html.Label(
-                        "Select Attractions of Interest 🎢",
+                        "Select Attractions 🎢",
                         className="fw-bold"
-                    ),
-                    html.Small(
-                        "Choose one or more attractions to monitor",
-                        className="text-muted d-block mb-2"
                     ),
                     dcc.Dropdown(
                         id='attractions-of-interest',
                         options=[{'label': attr, 'value': attr} for attr in ALL_ATTRACTIONS],
-                        value=[ALL_ATTRACTIONS[0]],  # Default to first attraction
+                        value=[ALL_ATTRACTIONS[0]],
                         multi=True,
-                        className="mb-3"
+                        className="mt-1"
                     )
-                ], width=12)
-            ]),
+                ], width=12, lg=6),
 
-            # View Type Toggle
-            dbc.Row([
-                dbc.Col([
-                    html.Label(
-                        "View Type 📊",
-                        className="fw-bold"
-                    ),
-                    html.Small(
-                        "Choose between daily overview or hourly details",
-                        className="text-muted d-block mb-2"
-                    ),
-                    dbc.RadioItems(
-                        id='view-type-toggle',
-                        options=[
-                            {'label': ' Daily Overview', 'value': 'daily'},
-                            {'label': ' Hourly Details', 'value': 'hourly'}
-                        ],
-                        value='daily',
-                        inline=True,
-                        className="mb-3"
-                    )
-                ], width=12)
-            ]),
 
-            # Apply Button
-            dbc.Row([
+                # Apply Button
                 dbc.Col([
+                    html.Label("\u00A0", className="fw-bold d-block"),  # Invisible label for alignment
                     dbc.Button(
                         "Apply Filters",
                         id="apply-customer-filters",
                         color="primary",
-                        className="w-100 mt-2"
+                        className="w-100 mt-1"
                     )
-                ], width=12)
-            ])
+                ], width=12, lg=2)
+            ], className="g-2 align-items-end")
         ])
-    ], className="shadow-sm")
+    ], className="shadow-sm mb-4")
