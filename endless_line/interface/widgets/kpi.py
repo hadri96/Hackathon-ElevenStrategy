@@ -39,6 +39,6 @@ def create_waiting_time_kpi(avg_wait_time):
                     )
                 ], className="text-center")
             ], className="d-flex align-items-center justify-content-center",
-               style={"height": "100%", "minHeight": "250px"})
+               style={"height": "100%", "minHeight": "350px"})
         ], className="h-100")
     ], className="shadow-sm h-100")

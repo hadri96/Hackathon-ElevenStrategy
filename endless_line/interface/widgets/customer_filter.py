@@ -20,7 +20,7 @@ def create_customer_filter(ALL_ATTRACTIONS):
                         multi=True,
                         className="mt-1"
                     )
-                ], width=12, lg=6),
+                ], width=12, lg=6, id='attractions-of-interest-dropdown'),
 
 
                 # Apply Button
