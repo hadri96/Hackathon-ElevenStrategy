@@ -3,7 +3,7 @@ import dash_bootstrap_components as dbc
 from endless_line.interface.widgets.filter_operator import create_operator_filter
 from endless_line.interface.widgets.predicted_attendance import create_attendance_forecast
 from endless_line.interface.widgets.predicted_waiting import create_waiting_forecast
-from endless_line.interface.widgets.kpi import create_waiting_time_kpi
+from endless_line.interface.widgets.kpi import create_waiting_time_kpi, create_attendance_kpi, create_churnrate_kpi
 from endless_line.data_utils.dashboard_utils import DashboardUtils
 from datetime import datetime, timedelta
 
@@ -37,7 +37,7 @@ layout = dbc.Container([
     dbc.Row([
         # First KPI
         dbc.Col([
-            html.Div(id="operator-kpi-1", children=create_waiting_time_kpi(0))  # Placeholder
+            html.Div(id="operator-kpi-1", children=create_churnrate_kpi(dashboard_utils.compute_kpi1(attractions=ALL_ATTRACTIONS)))  # Placeholder
         ], id="kpi-row",width=12, lg=6),
 
         # Second KPI
@@ -90,7 +90,7 @@ def update_operator_dashboard(n_clicks, start_date, end_date, selected_attractio
 
     # Compute waiting times data for selected attractions
     hist_wait, pred_wait = dashboard_utils.predicted_waiting_time(
-        threshold_date=datetime.today(),
+        threshold_date=end_datetime,
         start_date=start_datetime,
         attractions=selected_attractions,
     )
@@ -99,11 +99,14 @@ def update_operator_dashboard(n_clicks, start_date, end_date, selected_attractio
     waiting_component = create_waiting_forecast(hist_wait, pred_wait, selected_attractions)
 
     # Create attendance forecast
-    attendance_component = create_attendance_forecast(start_date=start_datetime)
+    attendance_component = create_attendance_forecast()
 
-    # Update KPI for selected attractions
+    # Update KPIs
     avg_wait_time = dashboard_utils.compute_kpi3(attractions=selected_attractions)
-    kpi1 = create_waiting_time_kpi(avg_wait_time)
-    kpi2 = create_waiting_time_kpi(avg_wait_time)
+    kpi3 = create_waiting_time_kpi(avg_wait_time)
 
-    return attendance_component, waiting_component, kpi1, kpi2
+    # Get churn rate for KPI2
+    churn_rate = dashboard_utils.compute_kpi1(selected_attractions)
+    kpi2 = create_churnrate_kpi(churn_rate)
+
+    return attendance_component, waiting_component, kpi2, kpi3
