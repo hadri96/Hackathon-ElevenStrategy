@@ -2,7 +2,24 @@ from dash import html, dcc, Input, Output
 import dash_bootstrap_components as dbc
 import plotly.graph_objects as go
 
-def create_waiting_forecast(hist, pred, attractions):
+def create_waiting_forecast(hist_wait, pred_wait, attractions):
+    """Create waiting times forecast widget."""
+    return dbc.Card([
+        dbc.CardBody([
+            html.H4("Waiting Times Forecast 🕒", className="mb-3"),
+            html.P([
+                "The solid lines represent historical waiting times, while the ",
+                html.Strong("dotted lines show forecasted values"),
+                " for each attraction."
+            ], className="text-muted mb-3"),
+            dcc.Graph(
+                figure=create_waiting_times_plot(hist_wait, pred_wait, attractions),
+                config={'displayModeBar': False}
+            )
+        ])
+    ], className="shadow-sm")
+
+def create_waiting_times_plot(hist, pred, attractions):
     """
     Create a waiting time forecast plot showing historical and predicted values for multiple attractions.
 
@@ -43,7 +60,7 @@ def create_waiting_forecast(hist, pred, attractions):
                 width=2
             ),
             name=attraction,
-            hovertemplate=f"{attraction}<br>Date: %{{x|%d/%m %H:%M}}<br>Wait: %{{y:.0f}} min<extra></extra>"
+            hovertemplate=f"{attraction}<br>Wait: %{{y:.0f}} min at %{{x|%H:%M}}<extra></extra>"
         ))
 
         # Predicted data (dashed)
@@ -58,7 +75,7 @@ def create_waiting_forecast(hist, pred, attractions):
             ),
             name=attraction + " (predicted)",
             showlegend=False,
-            hovertemplate=f"{attraction} (predicted)<br>Date: %{{x|%d/%m %H:%M}}<br>Wait: %{{y:.0f}} min<extra></extra>"
+            hovertemplate=f"{attraction} (predicted)<br>Wait: %{{y:.0f}} min at %{{x|%H:%M}}<extra></extra>"
         ))
 
     # Get unique days for annotations and shapes
@@ -136,22 +153,4 @@ def create_waiting_forecast(hist, pred, attractions):
         dragmode=False
     )
 
-    return dbc.Card([
-        dbc.CardHeader([
-            html.Div([
-                html.I(className="fas fa-clock me-2"),
-                html.H5("Waiting Times Forecast", className="mb-0"),
-            ], className="d-flex align-items-center")
-        ]),
-        dbc.CardBody([
-            dcc.Graph(
-                figure=fig,
-                config={
-                    'displayModeBar': False,
-                    'showAxisDragHandles': False,
-                    'showAxisRangeEntryBoxes': False,
-                },
-                style={'height': '400px'}  # Match the figure height
-            )
-        ], style={'padding': '1rem'})  # Add some padding around the graph
-    ], className="shadow-sm")
+    return fig

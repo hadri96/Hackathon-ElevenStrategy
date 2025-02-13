@@ -4,6 +4,8 @@ import requests
 import pandas as pd
 from endless_line.data_utils.dataloader import DataLoader
 from datetime import datetime
+from warnings import filterwarnings
+filterwarnings('ignore')
 
 class WeatherForecast:
 	def __init__(self):

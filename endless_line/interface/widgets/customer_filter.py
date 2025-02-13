@@ -16,7 +16,7 @@ def create_customer_filter(ALL_ATTRACTIONS):
                     dcc.Dropdown(
                         id='attractions-of-interest',
                         options=[{'label': attr, 'value': attr} for attr in ALL_ATTRACTIONS],
-                        value=[ALL_ATTRACTIONS[0]],
+                        value=None,
                         multi=True,
                         className="mt-1"
                     )

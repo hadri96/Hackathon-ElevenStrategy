@@ -20,7 +20,8 @@ layout = dbc.Container([
                        className="display-4 mb-3"),
                 html.P([
                     "Monitor park performance, attendance trends, and attraction wait times. ",
-                    "Use the filters below to analyze specific time periods and attractions."
+                    "Use the filters below to analyze specific time periods and attractions.",
+                    "If no attractions are selected, the dashboard will show the wait time for all attractions."
                 ], className="lead")
             ], className="py-3")
         ], width=12)
@@ -38,7 +39,7 @@ layout = dbc.Container([
         # First KPI
         dbc.Col([
             html.Div(id="operator-kpi-1", children=create_churnrate_kpi(dashboard_utils.compute_kpi1(attractions=ALL_ATTRACTIONS)))
-        ], width=12, lg=6),
+        ], width=12, lg=6, style={"height": "100%"}, id="kpi-row1"),
 
         # WTEI Widget
         dbc.Col([
@@ -46,7 +47,7 @@ layout = dbc.Container([
                 id="loading-wtei",
                 children=html.Div(id="operator-wtei-container")
             )
-        ], width=12, lg=6, id="kpi-row2")
+        ], width=12, lg=6, id="kpi-row2", style={"height": "100%"})
     ], className="mb-4"),
 
     # Attendance Forecast
@@ -84,7 +85,7 @@ layout = dbc.Container([
 def update_operator_dashboard(n_clicks, start_date, end_date, selected_attractions):
     """Update dashboard elements based on selected attractions."""
     if not selected_attractions:
-        selected_attractions = [ALL_ATTRACTIONS[0]]
+        selected_attractions = ALL_ATTRACTIONS
 
     # Convert string dates to datetime objects
     end_datetime = datetime.strptime(end_date, '%Y-%m-%d') if end_date else datetime.today()
