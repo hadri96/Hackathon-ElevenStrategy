@@ -26,6 +26,13 @@ def create_navbar():
         ),
         dbc.NavItem(
             dbc.NavLink(
+                "Customer View",
+                href="/customer",
+                className="nav-link-custom"
+            )
+        ),
+        dbc.NavItem(
+            dbc.NavLink(
                 "When Should I Go?",
                 href="/when",
                 className="nav-link-custom"

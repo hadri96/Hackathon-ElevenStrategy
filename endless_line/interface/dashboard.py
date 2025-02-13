@@ -15,7 +15,6 @@ import pandas as pd
 from endless_line.data_utils.weather_forecast import WeatherForecast
 import json
 from endless_line.data_utils.dashboard_utils import DashboardUtils
-from attendance_prediction_model.new_attedance_pred import predict_attendance
 from warnings import filterwarnings
 
 filterwarnings("ignore")
@@ -251,10 +250,9 @@ def update_dashboard(n_clicks, selected_date, selected_hour, closed_attractions,
         )
 
     # Create attendance widget and weather card
-    out = predict_attendance('prophet_model.pkl', days_to_predict=5)
-    attendance = DashboardUtils().get_attendance(out, selected_date)
+    predicted_attendance = DashboardUtils().get_attendance(selected_date)
 
-    attendance_widget = create_attendance_widget(attendance)
+    attendance_widget = create_attendance_widget(predicted_attendance)
 
     weather_forecast = WeatherForecast().get_forecast(selected_date, selected_hour)
     if not weather_forecast.empty:
