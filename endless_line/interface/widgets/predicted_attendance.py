@@ -94,7 +94,7 @@ def create_attendance_forecast():
         ),
         height=300
     )
-
+    del hist, pred
     return dbc.Card([
         dbc.CardHeader([
             html.Div([

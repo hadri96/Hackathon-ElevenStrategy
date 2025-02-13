@@ -71,15 +71,11 @@ def create_weather_forecast_plot():
         xaxis_title=None,
         yaxis=dict(
             title="Temperature (°C)",
-            titlefont=dict(color='#FF9933'),
-            tickfont=dict(color='#FF9933'),
             gridcolor='rgba(255,153,51,0.1)',
             zeroline=False
         ),
         yaxis2=dict(
             title="Humidity (%)",
-            titlefont=dict(color='#3366CC'),
-            tickfont=dict(color='#3366CC'),
             anchor="x",
             overlaying="y",
             side="right",

@@ -3,11 +3,13 @@ import dash_bootstrap_components as dbc
 from endless_line.interface.widgets.customer_filter import create_customer_filter
 from endless_line.interface.widgets.weather_forecast import create_weather_forecast_plot
 from endless_line.interface.widgets.predicted_attendance import create_attendance_forecast
+from endless_line.interface.widgets.kpi import create_waiting_time_kpi
 from endless_line.data_utils.dashboard_utils import DashboardUtils
 
+# Initialize dashboard utils and compute KPIs
 dashboard_utils = DashboardUtils()
 ALL_ATTRACTIONS = dashboard_utils.get_attractions()
-
+avg_wait_time = dashboard_utils.compute_kpi3()
 
 layout = dbc.Container([
     # Header Section with Explanation
@@ -38,16 +40,9 @@ layout = dbc.Container([
             create_attendance_forecast()
         ], width=12, lg=8),
 
-        # Daily Statistics
+        # Daily Statistics with KPI
         dbc.Col([
-            dbc.Card([
-                dbc.CardHeader([
-                    html.H5("Daily Statistics 📊", className="mb-0")
-                ]),
-                dbc.CardBody([
-                    html.Div(id="daily-stats")
-                ])
-            ], className="shadow-sm h-100")
+            create_waiting_time_kpi(avg_wait_time)
         ], width=12, lg=4)
     ], className="mb-4"),
 
