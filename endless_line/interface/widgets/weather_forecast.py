@@ -4,12 +4,17 @@ import plotly.graph_objects as go
 from endless_line.data_utils.weather_forecast import WeatherForecast
 from datetime import datetime, timedelta
 
-def create_weather_forecast_plot():
+def create_weather_forecast_plot(start_date=None, end_date=None):
     """Create a weather forecast plot with temperature and humidity lines, daily separators, and icons below."""
 
     # Get weather forecast data
     weather = WeatherForecast()
     forecast_data = weather.get_forecast()
+
+    if start_date is not None:
+        forecast_data = forecast_data[forecast_data['dt_iso'] >= start_date]
+    if end_date is not None:
+        forecast_data = forecast_data[forecast_data['dt_iso'] <= end_date]
 
     # Create the figure
     fig = go.Figure()
