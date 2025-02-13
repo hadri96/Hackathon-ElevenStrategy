@@ -35,7 +35,7 @@ def create_waiting_time_kpi(avg_wait_time):
 
                     # Description
                     html.P(
-                        "Average wait time over the last 30 days",
+                        "Average wait time over the last 30 days for the selected attractions",
                         className="text-muted mb-0",
                         style={"fontSize": "1.1rem"}
                     )
@@ -126,17 +126,16 @@ def create_wtei_ratio(wtei_ratios):
         dbc.CardHeader([
             html.Div([
                 html.I(className="fas fa-chart-bar me-2"),
-                html.H5("Wait Time Efficiency Index", className="mb-0"),
+                html.H5("Wait Time Efficiency Index (WTEI)", className="mb-0"),
             ], className="d-flex align-items-center")
         ]),
         dbc.CardBody([
+            html.P("The WTEI measures how efficiently an attraction is managed by comparing the average wait time to the maximum wait time.", className="text-muted mb-0", style={"fontSize": "0.8rem"}),
             dcc.Graph(
                 figure=fig,
                 config={
-                    'displayModeBar': False,
                     'showAxisDragHandles': False,
                     'showAxisRangeEntryBoxes': False,
-                    'staticPlot': True
                 }
             )
         ])

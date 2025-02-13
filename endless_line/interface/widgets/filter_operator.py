@@ -39,7 +39,6 @@ def create_operator_filter(ALL_ATTRACTIONS):
                     dcc.Dropdown(
                         id='attractions-of-interest',
                         options=[{'label': attr, 'value': attr} for attr in ALL_ATTRACTIONS],
-                        value=[ALL_ATTRACTIONS[0]],
                         multi=True,
                         className="mt-1",
                         style={'height': '100%', 'min-height': '100px'}  # Increased height

@@ -1,26 +1,42 @@
 from dash import html, dcc
 import dash_bootstrap_components as dbc
 
-def create_feature_card(title, description, icon, link):
+def create_feature_card(title, description, icon, link=None, dual_buttons=False):
     """Create a feature card with hover effect"""
+    # Create button section based on whether it's dual buttons or single button
+    button_section = (
+        [
+            dbc.Button(
+                ["Customer ", html.I(className="fas fa-user ms-1")],
+                href="/customer",
+                color="primary",
+                className="mt-3 me-2 hover-grow"
+            ),
+            dbc.Button(
+                ["Operator", html.I(className="fas fa-cogs ms-1")],
+                href="/operator",
+                color="secondary",
+                className="mt-3 hover-grow"
+            )
+        ] if dual_buttons else
+        dbc.Button(
+            ["Explore ", html.I(className="fas fa-arrow-right ms-1")],
+            href=link,
+            color="primary",
+            className="mt-3 hover-grow"
+        )
+    )
+
     return dbc.Card([
         dbc.CardBody([
             html.Div([
                 html.I(className=f"fas {icon} fa-2x mb-3"),
                 html.H3(title, className="mb-3"),
                 html.P(description, className="text-muted"),
-                dbc.Button(
-                    [
-                        "Explore ",
-                        html.I(className="fas fa-arrow-right ms-1")
-                    ],
-                    href=link,
-                    color="primary",
-                    className="mt-3 hover-grow"
-                )
+                html.Div(button_section, className="d-flex justify-content-center")
             ], className="text-center")
         ], className="p-4")
-    ], className="h-100 card-animated shadow-sm")  # Simplified class names
+    ], className="h-100 card-animated shadow-sm")
 
 layout = html.Div([
     # Background pattern container
@@ -59,7 +75,7 @@ layout = html.Div([
                     "Interactive Dashboard",
                     "Monitor forecasted wait times, weather conditions, and crowd levels for the next 5 days. Make informed decisions about which attractions to visit next.",
                     "fa-chart-line",
-                    "/dashboard"
+                    dual_buttons=True  # Enable dual buttons for this card
                 )
             ], width=12, md=4, className="mb-4"),
 

@@ -44,7 +44,7 @@ class DashboardUtils:
 		output = df[df['ds'].dt.date.astype(str) == date]['yhat'].values[0]
 		return int(str(int(output)).replace(',', ' '))
 
-	def predicted_waiting_time(self, threshold_date: datetime.date, start_date: datetime.date, attractions=None, ):
+	def predicted_waiting_time(self, threshold_date: datetime.date, start_date: datetime.date, attractions=None):
 		if attractions is None:
 			attractions = self.attractions
 		if 'Vertical Drop' in attractions:
