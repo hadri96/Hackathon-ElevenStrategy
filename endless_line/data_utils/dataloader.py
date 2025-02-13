@@ -360,6 +360,11 @@ class DataLoader:
 		self.waiting_times.loc[self.waiting_times['WORK_DATE'].dt.year.isin([2018, 2019]), 'WORK_DATE'] += pd.DateOffset(years=2)
 		self.waiting_times.loc[self.waiting_times['DEB_TIME'].dt.year.isin([2018, 2019]), 'DEB_TIME'] += pd.DateOffset(years=2)
 		self.waiting_times.loc[self.waiting_times['FIN_TIME'].dt.year.isin([2018, 2019]), 'FIN_TIME'] += pd.DateOffset(years=2)
+		self.waiting_times = self.waiting_times.drop(columns=["CAPACITY"])
+		attractions = self.link_attraction_park['ATTRACTION'].tolist()
+		self.waiting_times = self.waiting_times[self.waiting_times['ENTITY_DESCRIPTION_SHORT'].isin(attractions + ['PortAventura World'])]
+		self.waiting_times['prev_wait_time'] = self.waiting_times.groupby('ENTITY_DESCRIPTION_SHORT')['WAIT_TIME_MAX'].shift(1)
+		#self.waiting_times = self.waiting_times[~((self.waiting_times['OPEN_TIME'].isnull()) & (self.waiting_times['WAIT_TIME_MAX'].isnull()))] # drop lines when closed
 		pass
 
 	def preprocess_weather(self):
@@ -395,10 +400,15 @@ class DataLoader:
 
 		self.weather.loc[self.weather['dt_iso'].dt.year.isin([2018, 2019]), 'dt_iso'] += pd.DateOffset(years=2)
 
+		self.weather['minute'] = self.weather['dt_iso'].dt.minute
 		self.weather['hour'] = self.weather['dt_iso'].dt.hour
 		self.weather['day'] = self.weather['dt_iso'].dt.day
 		self.weather['month'] = self.weather['dt_iso'].dt.month
 		self.weather['day_of_week'] = self.weather['dt_iso'].dt.dayofweek
+		self.weather['is_weekend'] = self.weather['dt_iso'].dt.dayofweek.isin([5, 6]).astype(int)
+		self.weather['is_peak_hour'] = self.weather['hour'].between(11, 18).astype(int)
+
+
 
 
 
@@ -484,7 +494,8 @@ class DataLoader:
 		self.merge_entity_schedule_pivot()
 		self.merge_entity_schedule()
 		self.merge_weather()
-		self.merge_attendance()
+		self.merge_attendance_and_scale()
+		
 		
 	def merge_parade_night_show(self):
 		"""
@@ -528,11 +539,23 @@ class DataLoader:
 		self.merged.drop(columns=["dt_iso", "DEB_TIME_2"], inplace=True)
 		self.merged = self.merged.sort_values('DEB_TIME').bfill()
 
-	def merge_attendance(self):
+	def merge_attendance_and_scale(self):
 		"""
 			merge waiting_times with attendance
 		"""
 		self.merged = self.merged.merge(self.attendance, left_on='WORK_DATE', right_on='USAGE_DATE', how='left').drop(columns='USAGE_DATE')
+		# List of numerical columns that should be scaled
+		numerical_columns = [
+			'GUEST_CARRIED', 'ADJUST_CAPACITY', 'OPEN_TIME', 'UP_TIME', 
+			'DOWNTIME', 'NB_MAX_UNIT', 'Num_parade', 'NB_UNITS', 
+			'temp', 'feels_like', 'pressure', 'wind_speed', 'clouds_all', 
+			'weather_description_encoded', 'weather_main_encoded', 
+			'minute', 'hour', 'day', 'month', 'day_of_week', 'attendance'
+		]
+
+		# Load your dataframe (assuming df is already loaded)
+		scaler = MinMaxScaler()
+		self.merged[numerical_columns] = scaler.fit_transform(self.merged[numerical_columns])
 
 	def round_to_quarter(self, dt, down=True):
 		"""
