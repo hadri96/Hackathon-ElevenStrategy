@@ -44,6 +44,21 @@ class DashboardUtils:
         output = df[df['ds'].dt.date.astype(str) == date]['yhat'].values[0]
         return int(str(int(output)).replace(',', ' '))
 
+    def predicted_waiting_time(self, threshold_date: datetime.date, start_date: datetime.date, attractions=None, ):
+        if attractions is None:
+            attractions = self.attractions
+        if 'Vertical Drop' in attractions:
+            attractions.remove('Vertical Drop')
+        self.data.predicted = self.data.load_file('lstm_attraction_wait_times.csv')
+        self.data.predicted.DEB_TIME = pd.to_datetime(self.data.predicted.DEB_TIME) + pd.Timedelta(days=365*3+1)
+        self.data.predicted = self.data.predicted[['DEB_TIME', 'Source'] + attractions]
+        hist = self.data.predicted[self.data.predicted['Source'] == 0]
+        hist = hist[(hist['DEB_TIME'] <= threshold_date) & (hist['DEB_TIME'] >= start_date)]
+        pred = self.data.predicted[self.data.predicted['Source'] == 1]
+        max_pred = datetime.today() + timedelta(days=5)
+        pred = pred[(pred['DEB_TIME'] >= threshold_date) & (pred['DEB_TIME'] <= max_pred)]
+        return hist, pred
+
     def get_predicted_attendance_with_past(self, current_date: datetime.date, start_date: datetime.date):
         self.data.attendance = self.data.load_file('attendance.csv')
         self.data.clean_attendance()

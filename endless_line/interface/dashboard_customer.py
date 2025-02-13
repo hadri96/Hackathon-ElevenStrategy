@@ -1,15 +1,43 @@
-from dash import html
+from dash import html, Input, Output, callback
 import dash_bootstrap_components as dbc
 from endless_line.interface.widgets.customer_filter import create_customer_filter
 from endless_line.interface.widgets.weather_forecast import create_weather_forecast_plot
 from endless_line.interface.widgets.predicted_attendance import create_attendance_forecast
+from endless_line.interface.widgets.predicted_waiting import create_waiting_forecast
 from endless_line.interface.widgets.kpi import create_waiting_time_kpi
 from endless_line.data_utils.dashboard_utils import DashboardUtils
+from datetime import datetime, timedelta
 
-# Initialize dashboard utils and compute KPIs
+# Initialize dashboard utils and compute data
 dashboard_utils = DashboardUtils()
 ALL_ATTRACTIONS = dashboard_utils.get_attractions()
-avg_wait_time = dashboard_utils.compute_kpi3()
+
+@callback(
+    [Output("waiting-times-container", "children"),
+     Output("waiting-time-kpi", "children")],
+    Input("attractions-of-interest", "value")
+)
+def update_dashboard(selected_attractions):
+    """Update dashboard elements based on selected attractions."""
+    if not selected_attractions:
+        selected_attractions = [ALL_ATTRACTIONS[0]]  # Default to first attraction
+
+    # Compute waiting times data for selected attractions
+    current_date = datetime.today()
+    hist_wait, pred_wait = dashboard_utils.predicted_waiting_time(
+        threshold_date=current_date,
+        start_date=current_date - timedelta(days=3),
+        attractions=selected_attractions,
+    )
+
+    # Create waiting times graph
+    waiting_component = create_waiting_forecast(hist_wait, pred_wait, selected_attractions)
+
+    # Update KPI for selected attractions
+    avg_wait_time = dashboard_utils.compute_kpi3(attractions=selected_attractions)
+    kpi_component = create_waiting_time_kpi(avg_wait_time)
+
+    return waiting_component, kpi_component
 
 layout = dbc.Container([
     # Header Section with Explanation
@@ -38,39 +66,19 @@ layout = dbc.Container([
         # Attendance Forecast
         dbc.Col([
             create_attendance_forecast()
-        ], width=12, lg=8),
+        ], width=12, lg=8, id='attendance-forecast-container'),
 
-        # Daily Statistics with KPI
+        # Average Wait Time KPI
         dbc.Col([
-            create_waiting_time_kpi(avg_wait_time)
+            html.Div(id="waiting-time-kpi")
         ], width=12, lg=4)
     ], className="mb-4"),
 
-    # Secondary Visualizations
+    # Waiting Times Forecast
     dbc.Row([
-        # Crowd Patterns
         dbc.Col([
-            dbc.Card([
-                dbc.CardHeader([
-                    html.H5("Attraction Wait Times 🎡", className="mb-0")
-                ]),
-                dbc.CardBody([
-                    html.Div(id="customer-graph")
-                ])
-            ], className="shadow-sm h-100")
-        ], width=12, lg=6),
-
-        # Peak Hours
-        dbc.Col([
-            dbc.Card([
-                dbc.CardHeader([
-                    html.H5("Peak Hours Analysis ⏰", className="mb-0")
-                ]),
-                dbc.CardBody([
-                    html.Div(id="customer-stats")
-                ])
-            ], className="shadow-sm h-100")
-        ], width=12, lg=6)
+            html.Div(id="waiting-times-container")
+        ], width=12)
     ], className="mb-4"),
 
     # Weather Forecast Row

@@ -19,8 +19,8 @@ def create_navbar():
         ),
         dbc.NavItem(
             dbc.NavLink(
-                "Dashboard",
-                href="/dashboard",
+                "Operator View",
+                href="/operator",
                 className="nav-link-custom"
             )
         ),
