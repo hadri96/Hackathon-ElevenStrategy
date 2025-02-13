@@ -6,7 +6,7 @@ from endless_line.interface.widgets.predicted_attendance import create_attendanc
 from endless_line.interface.widgets.predicted_waiting import create_waiting_forecast
 from endless_line.interface.widgets.kpi import create_waiting_time_kpi
 from endless_line.data_utils.dashboard_utils import DashboardUtils
-from datetime import datetime
+from datetime import datetime, timedelta
 
 # Initialize dashboard utils and compute data
 dashboard_utils = DashboardUtils()
@@ -26,8 +26,8 @@ def update_dashboard(selected_attractions):
     current_date = datetime.today()
     hist_wait, pred_wait = dashboard_utils.predicted_waiting_time(
         threshold_date=current_date,
+        start_date=current_date - timedelta(days=3),
         attractions=selected_attractions,
-        lookback=3  # 3 days of historical data
     )
 
     # Create waiting times graph

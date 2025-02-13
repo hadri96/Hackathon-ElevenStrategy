@@ -1,13 +1,16 @@
 from dash import html, dcc
 import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output, State
-from endless_line.interface import home, about, dashboard, when, dashboard_customer
+from endless_line.interface import (
+    home, about, dashboard_operator, when,
+    dashboard_customer
+)
 from endless_line.interface.widgets.navbar import create_navbar
 from endless_line.interface.app import app, server
 from warnings import filterwarnings
 filterwarnings("ignore")
 
-# Define the main menu or navigation bar (optional)
+# Define the main menu or navigation bar
 navbar = create_navbar()
 
 # This is the main app layout, with a Location component and a container
@@ -27,8 +30,8 @@ def display_page(pathname):
         return home.layout
     elif pathname == "/about":
         return about.layout
-    elif pathname == "/dashboard":
-        return dashboard.layout
+    elif pathname == "/operator":
+        return dashboard_operator.layout
     elif pathname in ["/when-to-go", "/when"]:
         return when.layout
     elif pathname == "/customer":
