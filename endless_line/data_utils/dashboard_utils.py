@@ -1,5 +1,5 @@
 from endless_line.data_utils.dataloader import DataLoader
-from attendance_prediction_model.new_attedance_pred import predict_attendance
+from endless_line.models.attendance_model import predict_attendance
 from datetime import datetime, timedelta
 import pandas as pd
 
@@ -32,7 +32,7 @@ class DashboardUtils:
         self.data.clean_link_attraction_park()
         return list(self.data.link_attraction_park.ATTRACTION.unique())
 
-    def get_attendance(self, df, date: datetime.date):
+    def get_attendance(self, date: datetime.date):
         """
         Args:
             df: DataFrame containing the forecasted attendance
@@ -40,6 +40,7 @@ class DashboardUtils:
         Output:
             Forecasted attendance for the given date
         """
+        df = predict_attendance('prophet_model.pkl')
         output = df[df['ds'].dt.date.astype(str) == date]['yhat'].values[0]
         return int(str(int(output)).replace(',', ' '))
 
