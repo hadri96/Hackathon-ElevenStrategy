@@ -1,7 +1,7 @@
 from endless_line.data_utils.dataloader import DataLoader
-from datetime import datetime
+from attendance_prediction_model.new_attedance_pred import predict_attendance
+from datetime import datetime, timedelta
 import pandas as pd
-
 
 class DashboardUtils:
     """
@@ -23,7 +23,7 @@ class DashboardUtils:
     def get_attendance(self, df, date: datetime.date):
         output = df[df['ds'].dt.date.astype(str) == date]['yhat'].values[0]
         return int(str(int(output)).replace(',', ' '))
-    
+
     def compute_kpi1(self, waiting_df):
         # KPI 1: Park performance on keeping customers loyal, see business notes
         kpis_attrac = {}
@@ -38,7 +38,7 @@ class DashboardUtils:
         count_percent = str(round(count_sup_80/waiting_df.shape[0]*100, 2)) + '%'
         kpis_attrac['Global'] = count_percent
         return kpis_attrac
-        
+
     def compute_kpi2(self, merged_df):
         """
         data = DataLoader(load_all_files=True)
@@ -56,7 +56,7 @@ class DashboardUtils:
             kpis_attrac[attrac] = (wait_time_30_attrac, wait_time_70_attrac)
         kpis_attrac['Global'] = (merged_df['wait_time_normalized'].quantile(0.30), merged_df['wait_time_normalized'].quantile(0.70))
         return kpis_attrac
-    
+
     def compute_kpi3(self, waiting_df):
         # KPI 3: Park waiting time tracking for customers, see business notes
         max_date = waiting_df['WORK_DATE'].max()

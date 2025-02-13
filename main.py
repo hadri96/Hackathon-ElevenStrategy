@@ -1,7 +1,7 @@
 from dash import html, dcc
 import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output, State
-from endless_line.interface import home, about, dashboard, when
+from endless_line.interface import home, about, dashboard, when, dashboard_customer
 from endless_line.interface.widgets.navbar import create_navbar
 from endless_line.interface.app import app, server
 from warnings import filterwarnings
@@ -31,6 +31,8 @@ def display_page(pathname):
         return dashboard.layout
     elif pathname in ["/when-to-go", "/when"]:
         return when.layout
+    elif pathname == "/customer":
+        return dashboard_customer.layout
     else:
         return html.H1("404: Page not found", className="text-danger")
 
