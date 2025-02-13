@@ -20,6 +20,7 @@ class Forecaster():
     def __init__(self, filename='wait_time_predictor.pkl', csv_name='waiting_time_predicted.csv'):
         self.filename = filename
         self.csv_name = csv_name
+        device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
         # XGBoost parameters (auto-detects CPU/GPU)
         self.params = {
@@ -30,7 +31,7 @@ class Forecaster():
             "subsample": 0.8,
             "colsample_bytree": 0.8,
             "n_jobs": -1,  # Use all CPU cores
-            "device": "cuda"
+            "device": device
         }
 
         # based on average waiting time of the attraction on the whole dataset
