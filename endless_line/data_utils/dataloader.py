@@ -555,8 +555,12 @@ class DataLoader:
 
 	def scale_and_move_to_2025(self):
 		"""
-			Scale the data and move it to 2025.
+		Scale the data (only for rows up to 2021-12-23) and then move it so that the last date aligns with 'today' (if after noon) or 'yesterday' (if before noon).
 		"""
+
+		# Filter data up to 2021-12-23
+		self.merged = self.merged[self.merged["WORK_DATE"] <= pd.Timestamp(2021, 12, 23)].copy()
+
 		# List of numerical columns that should be scaled
 		numerical_columns = [
 			'GUEST_CARRIED', 'ADJUST_CAPACITY', 'OPEN_TIME', 'UP_TIME', 
@@ -566,12 +570,11 @@ class DataLoader:
 			'minute', 'hour', 'day', 'month', 'day_of_week', 'attendance'
 		]
 
-		# Load your dataframe (assuming df is already loaded)
+		# Scale numerical columns with MinMaxScaler
 		scaler = MinMaxScaler()
 		self.merged[numerical_columns] = scaler.fit_transform(self.merged[numerical_columns])
 
-		# We now move the dataset to simulate the fact that it comes to 2025
-		# Get the maximum date in the dataset
+		# Get the maximum date in the filtered dataset
 		max_date = self.merged["WORK_DATE"].max()
 
 		# Determine target date (today if after noon, yesterday if before noon)
@@ -583,10 +586,9 @@ class DataLoader:
 
 		# Apply the shift to the relevant columns
 		self.merged["WORK_DATE"] = self.merged["WORK_DATE"] + pd.Timedelta(days=days_to_shift)
-		self.merged['WORK_DATE'] = self.merged['WORK_DATE'].dt.date
+		self.merged["WORK_DATE"] = self.merged["WORK_DATE"].dt.date
 
 		self.merged["DEB_TIME"] = self.merged["DEB_TIME"] + pd.Timedelta(days=days_to_shift)
-
 		self.merged["FIN_TIME"] = self.merged["FIN_TIME"] + pd.Timedelta(days=days_to_shift)
 
 	def round_to_quarter(self, dt, down=True):
