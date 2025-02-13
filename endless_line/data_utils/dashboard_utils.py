@@ -50,7 +50,7 @@ class DashboardUtils:
         if 'Vertical Drop' in attractions:
             attractions.remove('Vertical Drop')
         self.data.predicted = self.data.load_file('lstm_attraction_wait_times.csv')
-        self.data.predicted.DEB_TIME = pd.to_datetime(self.data.predicted.DEB_TIME) + pd.Timedelta(days=365*3+1)
+        self.data.predicted.DEB_TIME = pd.to_datetime(self.data.predicted.DEB_TIME)+ pd.Timedelta(days=365*3+1)
         self.data.predicted = self.data.predicted[['DEB_TIME', 'Source'] + attractions]
         hist = self.data.predicted[self.data.predicted['Source'] == 0]
         hist = hist[(hist['DEB_TIME'] <= threshold_date) & (hist['DEB_TIME'] >= start_date)]

@@ -36,3 +36,7 @@ p {
 #attendance-forecast-container {
 	z-index:-1;
 }
+
+#kpi-row, #kpi-row2 {
+	z-index:-1;
+}

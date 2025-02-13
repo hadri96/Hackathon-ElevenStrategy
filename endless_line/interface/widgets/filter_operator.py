@@ -25,7 +25,8 @@ def create_operator_filter(ALL_ATTRACTIONS):
                         max_date_allowed=max_date,
                         start_date=today - timedelta(days=3),
                         end_date=today + timedelta(days=2),
-                        className="mt-1"
+                        className="mt-1",
+                        display_format="DD/MM/YYYY"
                     )
                 ], width=12, lg=4),
 

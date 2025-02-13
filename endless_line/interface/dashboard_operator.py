@@ -38,13 +38,13 @@ layout = dbc.Container([
         # First KPI
         dbc.Col([
             html.Div(id="operator-kpi-1", children=create_waiting_time_kpi(0))  # Placeholder
-        ], width=12, lg=6),
+        ], id="kpi-row",width=12, lg=6),
 
         # Second KPI
         dbc.Col([
             html.Div(id="operator-kpi-2", children=create_waiting_time_kpi(0))  # Placeholder
-        ], width=12, lg=6)
-    ], className="mb-4"),
+        ], id="kpi-row2", width=12, lg=6)
+    ],  className="mb-4"),
 
     # Attendance Forecast
     dbc.Row([
@@ -90,7 +90,7 @@ def update_operator_dashboard(n_clicks, start_date, end_date, selected_attractio
 
     # Compute waiting times data for selected attractions
     hist_wait, pred_wait = dashboard_utils.predicted_waiting_time(
-        threshold_date=end_datetime,
+        threshold_date=datetime.today(),
         start_date=start_datetime,
         attractions=selected_attractions,
     )
@@ -99,7 +99,7 @@ def update_operator_dashboard(n_clicks, start_date, end_date, selected_attractio
     waiting_component = create_waiting_forecast(hist_wait, pred_wait, selected_attractions)
 
     # Create attendance forecast
-    attendance_component = create_attendance_forecast()
+    attendance_component = create_attendance_forecast(start_date=start_datetime)
 
     # Update KPI for selected attractions
     avg_wait_time = dashboard_utils.compute_kpi3(attractions=selected_attractions)
