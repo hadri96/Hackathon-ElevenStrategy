@@ -369,7 +369,6 @@ class DataLoader:
 		self.waiting_times = self.waiting_times.drop(columns=["CAPACITY"])
 		attractions = self.link_attraction_park['ATTRACTION'].tolist()
 		self.waiting_times = self.waiting_times[self.waiting_times['ENTITY_DESCRIPTION_SHORT'].isin(attractions + ['PortAventura World'])]
-		self.waiting_times['prev_wait_time'] = self.waiting_times.groupby('ENTITY_DESCRIPTION_SHORT')['WAIT_TIME_MAX'].shift(1)
 		#self.waiting_times = self.waiting_times[~((self.waiting_times['OPEN_TIME'].isnull()) & (self.waiting_times['WAIT_TIME_MAX'].isnull()))] # drop lines when closed
 		pass
 
@@ -399,11 +398,6 @@ class DataLoader:
 		# Drop original categorical columns
 		self.weather.drop(columns=['weather_main', 'weather_description'], inplace=True)
 
-		# Normalize numerical columns
-		scaler = MinMaxScaler()
-		num_cols = ['temp', 'feels_like', 'pressure', 'wind_speed', 'clouds_all']
-		self.weather[num_cols] = scaler.fit_transform(self.weather[num_cols])
-
 		self.weather.loc[self.weather['dt_iso'].dt.year.isin([2018, 2019]), 'dt_iso'] += pd.DateOffset(years=2)
 
 		self.weather['minute'] = self.weather['dt_iso'].dt.minute
@@ -413,8 +407,6 @@ class DataLoader:
 		self.weather['day_of_week'] = self.weather['dt_iso'].dt.dayofweek
 		self.weather['is_weekend'] = self.weather['dt_iso'].dt.dayofweek.isin([5, 6]).astype(int)
 		self.weather['is_peak_hour'] = self.weather['hour'].between(11, 18).astype(int)
-
-
 
 
 
