@@ -26,12 +26,16 @@ class Forecaster():
         self.params = {
             "objective": "reg:squarederror",
             "eval_metric": "rmse",
-            "eta": 0.1,
-            "max_depth": 6,
-            "subsample": 0.8,
-            "colsample_bytree": 0.8,
             "n_jobs": -1,  # Use all CPU cores
-            "device": device
+            "device": device,
+            'max_depth': 8, 
+            'learning_rate': 0.011203917217058957, 
+            'subsample': 0.864883359133158, 
+            'colsample_bytree': 0.6630566722775643, 
+            'min_child_weight': 0.3668676768022224, 
+            'lambda': 0.10020012648372298, 
+            'alpha': 0.19936220554480838, 
+            'gamma': 0.4233553876209511
         }
 
         # based on average waiting time of the attraction on the whole dataset
@@ -104,7 +108,7 @@ class Forecaster():
         df["minute"] = df["DEB_TIME"].dt.minute
 
         # Select columns to scale
-        columns_to_scale = ['GUEST_CARRIED', 'CAPACITY', 'ADJUST_CAPACITY', 'NB_UNITS', 'NB_MAX_UNIT', 'OPEN_TIME', 'UP_TIME', 'DOWNTIME', 'hour', 'day', 'month', 'year', 'minute']
+        columns_to_scale = ['hour', 'day', 'month', 'year', 'minute']
 
         if train:
             self.scaler = MinMaxScaler()
@@ -128,6 +132,9 @@ class Forecaster():
         return df
 
     def fit(self, df_train):
+        """
+            fitting the model
+        """
 
         df_train_y = df_train[['WAIT_TIME_MAX']]
         df_train_x = df_train.drop(columns=['WAIT_TIME_MAX'])
@@ -147,6 +154,7 @@ class Forecaster():
 
     def predict(self, X, pivot=True, export=True):
         """
+            predicts using the model
             need X to have DEB_TIME and WORK_DATE
         """
         # Final featuring
@@ -178,12 +186,18 @@ class Forecaster():
         return res
     
     def pivot(self,df):
+        """
+            pivoting the results on the attractions to get the right format for plotting.
+        """
         df['attraction'] = df['attraction_encoded'].apply(lambda x: self.attraction_decoding[x])
         df = df.drop(columns=['attraction_encoded'])
         df_pivot = df.pivot(index='DEB_TIME', columns='attraction', values='PRED')
         return df_pivot
     
     def export(self, df, csv_name):
+        """
+            export the results of the prediction as a csv
+        """
         root_dir = DataLoader().root_dir
         os.path.join(root_dir,csv_name)
         df.to_csv(csv_name)
