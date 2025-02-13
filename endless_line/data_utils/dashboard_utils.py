@@ -98,7 +98,9 @@ class DashboardUtils:
         """
         if attractions is None:
             attractions = self.attractions
-        waiting_df = self.data.load_file('fictional_waiting_times.csv')
+        self.data.waiting_times = self.data.load_file('fictional_waiting_times.csv')
+        self.data.clean_waiting_times()
+        waiting_df = self.data.waiting_times.copy()
         max_date = datetime.today()
         date_minus_month = max_date - pd.DateOffset(months=1)
         restricted_waiting_time = waiting_df[(waiting_df['WORK_DATE'] >= date_minus_month) & (waiting_df['WORK_DATE'] <= max_date)]
