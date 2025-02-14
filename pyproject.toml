@@ -34,8 +34,6 @@ dependencies = [
 	"gunicorn>=20.1.0",
 	"boto3>=1.35.0",
 	"prophet>=1.1.6",
-	"torch>=2.0.0",
-	"tensorflow>=2.12.0",
 	"scikeras>=0.1.0",
 	"xgboost>=1.7.0",
 ]
